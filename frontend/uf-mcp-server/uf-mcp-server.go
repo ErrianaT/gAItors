@@ -36,12 +36,6 @@ func main() {
 func registerTools(mcpServer *server.Server) {
 	mcpServer.RegisterTool(tools.GetCalculatorTool())
 	mcpServer.RegisterTool(tools.GetProfessorRatingTool())
-	mcpServer.RegisterTool(tools.GetUFClassScheduleTool())
-	mcpServer.RegisterTool(tools.GetDirectionsTool())
-	mcpServer.RegisterTool(tools.GetRestaurantsTool())
-	mcpServer.RegisterTool(tools.GetWeatherTool())
-	mcpServer.RegisterTool(tools.GetGymCamTool())
-	mcpServer.RegisterTool(tools.GetCampusSafetyLocatorTool())
 }
 
 func getMcpServer() *server.Server {
@@ -73,3 +67,4 @@ func getMcpServer() *server.Server {
 
 	return mcpServer
 }
+

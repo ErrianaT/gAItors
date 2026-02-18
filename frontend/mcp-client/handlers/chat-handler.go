@@ -34,6 +34,16 @@ var AgentRegistry = map[string]llm.Agent{
             return schedule_agent.SelectScheduleTool(ctx, model, query)
         },
     },
+    "Chat Agent": {
+        Name: "Chat Agent",
+        SelectTool: func(ctx context.Context, model *openai.LLM, query string) (*llm.SelectedToolInfo, error) {
+            // Chat agent has no tools — return a no-op
+            return &llm.SelectedToolInfo{
+                ToolName: "none",
+                ToolArgs: map[string]any{},
+            }, nil
+        },
+    },
 
 }
 

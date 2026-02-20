@@ -1,0 +1,33 @@
+How to setup backend?
+
+Clone the projcet
+
+1. Bring up MCP Servers
+
+    1.1 uf-mcp-server
+        cd backend/uf-mcp-server
+        ./compile.bat
+        ./run.bat
+    
+    1.2 rts-mcp-server
+        cd backend/rts-mcp-server
+        ./compile.bat
+        ./run.bat
+
+    1.3 rts-mcp-server
+        cd backend/rag-mcp-server
+        ./compile.bat
+        ./run.bat
+
+2. Bring up mcp-client
+
+cd backend/mcp-client
+./compile.bat
+./run.bat
+
+How to test backend?
+
+Install Bruno  (https://www.usebruno.com/downloads)
+Click on Collection -> Open Collection 
+Select backend/bruno
+Select testChat

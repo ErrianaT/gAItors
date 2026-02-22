@@ -1,0 +1,10 @@
+.app-container {
+    font-family: Arial, sans-serif;
+  }
+  
+  /* main content fills the screen under the navbar */
+  .main-content {
+    display: flex;
+    margin-top: 60px; /* space for navbar */
+    height: calc(100vh - 60px);
+  }

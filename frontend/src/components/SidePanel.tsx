@@ -10,7 +10,7 @@ interface SidePanelProps {
   width?: number;        
 }
 
-const SidePanel: React.FC<SidePanelProps> = ({ isOpen, width = 250 }) => {
+const SidePanel: React.FC<SidePanelProps> = ({ isOpen, width = 200 }) => {
     return (
       <div className={`side-panel ${isOpen ? "open" : ""}`} style={{ width: `${width}px` }}>
         <div className="side-panel-content">

@@ -6,7 +6,6 @@
     align-items: center;
     justify-content: space-between;
     padding: 0 20px;
-    font-family: "Inter", sans-serif;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     position: fixed;
     top: 0;
@@ -24,7 +23,7 @@
   
   .menu-icon {
     margin-top: 6px;
-    margin-left: 15px;
+    margin-left: 10px;
     width: 24px;
     height: 24px;
     cursor: pointer;

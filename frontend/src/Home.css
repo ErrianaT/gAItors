@@ -2,10 +2,15 @@
 
 .app-container {
   font-family: 'Figtree', sans-serif;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
-  
-.main-content {
-    display: flex;
-    margin-top: 60px; 
-    height: calc(100vh - 60px);
+
+.chat-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center; 
+  align-items: center;   
+  height: calc(100vh - 50px); 
 }

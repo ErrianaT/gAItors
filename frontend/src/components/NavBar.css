@@ -42,3 +42,40 @@
     height: 26px;
     cursor: pointer;
   }
+
+  .navbar-profile {
+    position: relative;
+  }
+  
+  .profile-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .profile-dropdown {
+    position: absolute;
+    right: 0;
+    top: 45px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    padding: 8px 0;
+    min-width: 140px;
+    z-index: 1000;
+  }
+  
+  .profile-dropdown button {
+    background: none;
+    border: none;
+    padding: 10px 16px;
+    text-align: left;
+    cursor: pointer;
+  }
+  
+  .profile-dropdown button:hover {
+    background: #0812a4;
+    color:#ffffff
+  }

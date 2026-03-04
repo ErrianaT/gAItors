@@ -2,7 +2,7 @@ import { useState } from "react";
 import NavBar from "./components/NavBar";
 import SidePanel from "./components/SidePanel";
 import ChatArea from "./components/chatArea";
-import type { Chat, Message } from "./components/types"; // shared types
+import type { Chat, Message } from "./components/types";
 import "./Home.css";
 
 function Home() {
@@ -48,12 +48,12 @@ function Home() {
 
   return (
     <div className="app-container">
-      <NavBar onMenuClick={toggleSidePanel} />
+      <NavBar isSidePanelOpen={isSidePanelOpen} onMenuClick={toggleSidePanel}/>
 
       <SidePanel
         isOpen={isSidePanelOpen}
-        onClose={() => setIsSidePanelOpen(false)}
         chats={chats}
+        onClose={() => setIsSidePanelOpen(false)} 
         activeChatId={activeChatId} 
         onSelectChat={setActiveChatId}
         onNewChat={createNewChat}

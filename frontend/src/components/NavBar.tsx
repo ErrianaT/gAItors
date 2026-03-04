@@ -4,11 +4,13 @@ import profileIcon from "../assets/profileIcon.png";
 import menuIcon from "../assets/menuIcon.png";
 
 interface NavBarProps {
+  isSidePanelOpen: boolean;
   onMenuClick: () => void;
 }
 
 const NavBar: React.FC<NavBarProps> = ({ onMenuClick }) => {
   const [isOpen, setIsOpen] = useState(false);
+  
   const menuRef = useRef<HTMLDivElement>(null);
 
   const toggleMenu = () => {

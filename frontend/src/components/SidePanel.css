@@ -7,11 +7,10 @@
     border-right: 1px solid #ddd;
     padding: 20px;
     box-sizing: border-box;
-    overflow-y: auto;
+    overflow-y: hidden;
     transform: translateX(-100%);
     transition: transform 0.5s ease;
     z-index: 900;
-  
     display: flex;
     flex-direction: column;
   }
@@ -63,7 +62,7 @@
 .chat-item {
   padding: 8px 15px;
   font-size: 14px;
-  color: #ef8e40;
+  color: #ffffff;
   cursor: pointer;
   border-left: 3px solid transparent; 
   border-radius: 4px;
@@ -75,7 +74,7 @@
 
 .chat-item.active {
   background-color: rgba(255, 170, 85, 0.4);
-  border-left: 3px solid #ffaa55;
+  color: white;
 }
 
 .more-item {
@@ -88,19 +87,19 @@
   background-color: rgba(255, 170, 85, 0.2);
 }
 
-/* Chat list container */
+.chat-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
 .chat-list-container {
-  max-height: 200px; /* default visible height */
-  overflow-y: hidden; /* hide scroll initially */
+  flex: 1;
+  min-height: 0;
+  overflow-y: hidden;
 }
 
-/* When expanded (Show More clicked), allow scrolling */
-.chat-list-container.expanded {
-  max-height: 300px; /* adjust based on how much space you want */
-  overflow-y: auto;  /* scroll in place */
-}
-
-/* Optional: smooth scroll */
-.chat-list-container.expanded {
-  transition: max-height 0.3s ease;
+.chat-list-container.scrollable {
+  overflow-y: auto;
 }

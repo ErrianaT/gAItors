@@ -7,10 +7,17 @@ type Message = {
   text: string;
 };
 
-const ChatArea: React.FC = () => {
+interface ChatAreaProps {
+  messages: Message[];
+  onSendMessage: (messages: Message[]) => void;
+}
+
+
+const ChatArea: React.FC<ChatAreaProps> = ({
+  messages,
+  onSendMessage,
+}) => {
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [hasSent, setHasSent] = useState(false);
 
   const handleSend = () => {
     if (!message.trim()) return;
@@ -22,13 +29,20 @@ const ChatArea: React.FC = () => {
 
     const botMessage: Message = {
       sender: "bot",
-      text: "", // until backend is ready
+      text: "", // placeholder until backend is ready
     };
 
-    setMessages((prev) => [...prev, userMessage, botMessage]);
-    setHasSent(true);
+    const updatedMessages = [
+      ...messages,
+      userMessage,
+      botMessage,
+    ];
+
+    onSendMessage(updatedMessages);
     setMessage("");
   };
+
+  const hasSent = messages.length > 0;
 
   return (
     <div className="chat-container">
@@ -41,8 +55,13 @@ const ChatArea: React.FC = () => {
           {messages.map((msg, index) => (
             <div key={index} className={`message-row ${msg.sender}`}>
               {msg.sender === "bot" && (
-                <img src={botAvatar} alt="Bot" className="bot-avatar" />
+                <img
+                  src={botAvatar}
+                  alt="Bot"
+                  className="bot-avatar"
+                />
               )}
+
               <div className={`message-bubble ${msg.sender}`}>
                 {msg.text || <div className="bot-placeholder" />}
               </div>
@@ -58,7 +77,10 @@ const ChatArea: React.FC = () => {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         />
-        <button className="send-button" onClick={handleSend}>
+        <button
+          className="send-button"
+          onClick={handleSend}
+        >
           Send
         </button>
       </div>

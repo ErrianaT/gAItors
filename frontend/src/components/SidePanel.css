@@ -52,3 +52,55 @@
     width: 20px;
     height: 20px;
   }
+
+.your-chats-label {
+  padding: 10px 10px;
+  font-weight: bold;
+  color: #ef8e40;
+  cursor: default;
+}
+
+.chat-item {
+  padding: 8px 15px;
+  font-size: 14px;
+  color: #ef8e40;
+  cursor: pointer;
+  border-left: 3px solid transparent; 
+  border-radius: 4px;
+}
+
+.chat-item:hover {
+  background-color: rgba(255, 170, 85, 0.2);
+}
+
+.chat-item.active {
+  background-color: rgba(255, 170, 85, 0.4);
+  border-left: 3px solid #ffaa55;
+}
+
+.more-item {
+  font-style: italic;
+  color: #ffaa55;
+  cursor: pointer;
+}
+
+.more-item:hover {
+  background-color: rgba(255, 170, 85, 0.2);
+}
+
+/* Chat list container */
+.chat-list-container {
+  max-height: 200px; /* default visible height */
+  overflow-y: hidden; /* hide scroll initially */
+}
+
+/* When expanded (Show More clicked), allow scrolling */
+.chat-list-container.expanded {
+  max-height: 300px; /* adjust based on how much space you want */
+  overflow-y: auto;  /* scroll in place */
+}
+
+/* Optional: smooth scroll */
+.chat-list-container.expanded {
+  transition: max-height 0.3s ease;
+}

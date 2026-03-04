@@ -29,7 +29,6 @@ const SidePanel: React.FC<SidePanelProps> = ({
   const [showAllChats, setShowAllChats] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // ✅ CLICK OUTSIDE LOGIC
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (

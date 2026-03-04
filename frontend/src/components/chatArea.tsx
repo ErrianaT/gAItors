@@ -76,6 +76,13 @@ const ChatArea: React.FC<ChatAreaProps> = ({
           placeholder="Ask me anything..."
           value={message}
           onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={(e) => {
+            if(e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleSend();
+            }
+          }
+          }
         />
         <button
           className="send-button"

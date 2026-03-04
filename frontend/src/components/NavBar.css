@@ -46,7 +46,7 @@
   .navbar-profile {
     position: relative;
   }
-  
+
   .profile-button {
     background: none;
     border: none;
@@ -69,6 +69,7 @@
   
   .profile-dropdown button {
     font-size: 16px;
+    font-family: 'Figtree', sans-serif;
     background: none;
     border: none;
     padding: 10px 16px;

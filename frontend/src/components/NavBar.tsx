@@ -15,7 +15,6 @@ const NavBar: React.FC<NavBarProps> = ({ onMenuClick }) => {
     setIsOpen((prev) => !prev);
   };
 
-  // Optional: Close when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {

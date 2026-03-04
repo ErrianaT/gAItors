@@ -11,7 +11,8 @@ function Home() {
   return (
     <div className="app-container">
       <NavBar onMenuClick={toggleSidePanel} />
-      <SidePanel isOpen={isSidePanelOpen} />
+      <SidePanel isOpen={isSidePanelOpen} onClose={() => setIsSidePanelOpen(false)}
+/>
       <div className="chat-wrapper">
         <ChatArea />
       </div>

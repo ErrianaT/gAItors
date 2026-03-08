@@ -103,3 +103,19 @@
 .chat-list-container.scrollable {
   overflow-y: auto;
 }
+
+.search-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: text;
+}
+
+.search-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  width: 100%;
+  color: white;
+}

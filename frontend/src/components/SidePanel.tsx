@@ -27,7 +27,13 @@ const SidePanel: React.FC<SidePanelProps> = ({
   activeChatId,
 }) => {
   const [showAllChats, setShowAllChats] = useState(false);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const [appliedSearchQuery, setAppliedSearchQuery] = useState("");
+
   const panelRef = useRef<HTMLDivElement>(null);
+
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -47,11 +53,15 @@ const SidePanel: React.FC<SidePanelProps> = ({
     };
   }, [isOpen, onClose]);
 
-  const visibleChats = showAllChats
-    ? chats
-    : chats.slice(0, MAX_VISIBLE_CHATS);
+  const filteredChats = chats.filter((chat) =>
+    chat.title.toLowerCase().includes(appliedSearchQuery.toLowerCase())
+  );
 
-  const shouldScroll = chats.length > MAX_VISIBLE_CHATS && showAllChats;
+  const visibleChats = showAllChats
+  ? filteredChats
+  : filteredChats.slice(0, MAX_VISIBLE_CHATS);
+
+  const shouldScroll = filteredChats.length > MAX_VISIBLE_CHATS && showAllChats;
 
   return (
     <div
@@ -67,10 +77,46 @@ const SidePanel: React.FC<SidePanelProps> = ({
             <img src={messagesIcon} alt="New Chat" className="list-icon" />
             <span>New Chat</span>
           </li>
-          <li>
+          <li
+            className="search-item"
+            onClick={() => !isSearching && setIsSearching(true)}
+          >
             <img src={searchIcon} alt="Search Chats" className="list-icon" />
-            <span>Search Chats</span>
-          </li>
+
+            {isSearching ? (
+              <input
+              className="search-input"
+              type="text"
+              placeholder="Search chats..."
+              value={searchQuery}
+              autoFocus
+              onChange={(e) => {
+                const value = e.target.value;
+                setSearchQuery(value);
+      
+                if (value === "") {
+                  setAppliedSearchQuery("");
+                }
+              }}
+              onBlur={() => {
+                if (!searchQuery) setIsSearching(false);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  setSearchQuery("");
+                  setAppliedSearchQuery("");
+                  setIsSearching(false);
+                }
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  setAppliedSearchQuery(searchQuery);
+                }
+              }}
+            />
+  ) : (
+    <span>Search Chats</span>
+  )}
+</li>
         </ul>
 
         {/* Chat Section */}
@@ -99,7 +145,7 @@ const SidePanel: React.FC<SidePanelProps> = ({
                 </li>
               ))}
 
-              {chats.length > MAX_VISIBLE_CHATS && (
+              {filteredChats.length > MAX_VISIBLE_CHATS && (
                 <li
                   className="chat-item more-item"
                   onClick={() =>
@@ -108,14 +154,13 @@ const SidePanel: React.FC<SidePanelProps> = ({
                 >
                   {showAllChats
                     ? "Show Less ↑"
-                    : `More → (${chats.length - MAX_VISIBLE_CHATS})`}
+                    : `More → (${filteredChats.length - MAX_VISIBLE_CHATS})`}
                 </li>
               )}
             </ul>
           </div>
         </div>
 
-        {/* Bottom fixed */}
         <ul className="side-panel-list bottom-list">
           <li>
             <img src={settingsIcon} alt="Settings" className="list-icon" />

@@ -23,6 +23,22 @@ function Home() {
     setActiveChatId(newChat.id);
   };
 
+  const updateChatTitle = (chatId: string, message: string) => {
+    setChats((prevChats) =>
+      prevChats.map((chat) => {
+        if (chat.id === chatId && chat.title.startsWith("Chat")) {
+          return {
+            ...chat,
+            title:
+              message.slice(0, 35) +
+              (message.length > 35 ? "..." : "")
+          };
+        }
+        return chat;
+      })
+    );
+  };
+
   const updateMessages = (newMessages: Message[]) => {
     if (!activeChatId) {
       const newChat: Chat = {
@@ -34,7 +50,13 @@ function Home() {
       setActiveChatId(newChat.id);
       return;
     }
-
+    
+    const lastUserMessage = [...newMessages].reverse().find(msg => msg.sender === "user");
+  
+    if (lastUserMessage) {
+      updateChatTitle(activeChatId, lastUserMessage.text);
+    }
+  
     setChats((prev) =>
       prev.map((chat) =>
         chat.id === activeChatId

@@ -46,12 +46,10 @@ const ChatArea: React.FC<ChatAreaProps> = ({
 
   return (
     <div className="chat-container">
-      {!hasSent && (
-        <div className="welcome-area">
-          <h1 className="title">Welcome to One-Stop!</h1>
-          <img src={botAvatar} alt="Gator Bot" className="welcome-gator" />
-        </div>
-      )}
+      <div className={`welcome-area ${hasSent ? "fade-out" : ""}`}>
+        <h1 className="title">Welcome to One-Stop!</h1>
+        <img src={botAvatar} alt="Gator Bot" className="welcome-gator" />
+      </div>
 
       <div className="messages-container">
         <div className="messages">
@@ -87,12 +85,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
           }
           }
         />
-        <button
-          className="send-button"
-          onClick={handleSend}
-        >
-          Send
-        </button>
+        <button className="send-button" onClick={handleSend}>Send</button>
       </div>
     </div>
   );

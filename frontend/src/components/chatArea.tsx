@@ -47,7 +47,10 @@ const ChatArea: React.FC<ChatAreaProps> = ({
   return (
     <div className="chat-container">
       {!hasSent && (
-        <h1 className="title">Welcome to One-Stop!</h1>
+        <div className="welcome-area">
+          <h1 className="title">Welcome to One-Stop!</h1>
+          <img src={botAvatar} alt="Gator Bot" className="welcome-gator" />
+        </div>
       )}
 
       <div className="messages-container">

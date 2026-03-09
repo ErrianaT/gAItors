@@ -13,6 +13,7 @@ interface SidePanelProps {
   onSelectChat: (id: string) => void;
   onNewChat: () => void;
   activeChatId: string | null;
+  clearChat?: () => void;
 }
 
 const MAX_VISIBLE_CHATS = 8;
@@ -25,151 +26,178 @@ const SidePanel: React.FC<SidePanelProps> = ({
   onSelectChat,
   onNewChat,
   activeChatId,
+  clearChat,
 }) => {
   const [showAllChats, setShowAllChats] = useState(false);
-
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [appliedSearchQuery, setAppliedSearchQuery] = useState("");
+  const [showSettings, setShowSettings] = useState(false);
+  const [textSize, setTextSize] = useState<"small" | "medium" | "large">("medium");
 
   const panelRef = useRef<HTMLDivElement>(null);
 
+  // Update body font size class when textSize changes
+  useEffect(() => {
+    document.body.classList.remove("text-small", "text-medium", "text-large");
+    document.body.classList.add(`text-${textSize}`);
+  }, [textSize]);
 
+  // Close panel on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        isOpen &&
-        panelRef.current &&
-        !panelRef.current.contains(event.target as Node)
-      ) {
+      if (isOpen && panelRef.current && !panelRef.current.contains(event.target as Node)) {
         onClose();
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen, onClose]);
 
   const filteredChats = chats.filter((chat) =>
     chat.title.toLowerCase().includes(appliedSearchQuery.toLowerCase())
   );
 
-  const visibleChats = showAllChats
-  ? filteredChats
-  : filteredChats.slice(0, MAX_VISIBLE_CHATS);
-
+  const visibleChats = showAllChats ? filteredChats : filteredChats.slice(0, MAX_VISIBLE_CHATS);
   const shouldScroll = filteredChats.length > MAX_VISIBLE_CHATS && showAllChats;
 
   return (
-    <div
-      ref={panelRef}
-      className={`side-panel ${isOpen ? "open" : ""}`}
-      style={{ width: `${width}px` }}
-    >
-      <div className="side-panel-content">
+    <>
+      <div
+        ref={panelRef}
+        className={`side-panel ${isOpen ? "open" : ""}`}
+        style={{ width: `${width}px` }}
+      >
+        <div className="side-panel-content">
 
-        {/* Top fixed items */}
-        <ul className="side-panel-list top-list">
-          <li onClick={onNewChat}>
-            <img src={messagesIcon} alt="New Chat" className="list-icon" />
-            <span>New Chat</span>
-          </li>
-          <li
-            className="search-item"
-            onClick={() => !isSearching && setIsSearching(true)}
-          >
-            <img src={searchIcon} alt="Search Chats" className="list-icon" />
-
-            {isSearching ? (
-              <input
-              className="search-input"
-              type="text"
-              placeholder="Search chats..."
-              value={searchQuery}
-              autoFocus
-              onChange={(e) => {
-                const value = e.target.value;
-                setSearchQuery(value);
-      
-                if (value === "") {
-                  setAppliedSearchQuery("");
-                }
-              }}
-              onBlur={() => {
-                if (!searchQuery) setIsSearching(false);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Escape") {
-                  setSearchQuery("");
-                  setAppliedSearchQuery("");
-                  setIsSearching(false);
-                }
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  setAppliedSearchQuery(searchQuery);
-                }
-              }}
-            />
-  ) : (
-    <span>Search Chats</span>
-  )}
-</li>
-        </ul>
-
-        {/* Chat Section */}
-        <div className="chat-section">
-          <div className="your-chats-label">Your Chats</div>
-
-          <div
-            className={`chat-list-container ${
-              shouldScroll ? "scrollable" : ""
-            }`}
-          >
-            <ul className="side-panel-list">
-              {visibleChats.length === 0 && (
-                <li className="chat-item">No chats yet</li>
+          {/* Top fixed items */}
+          <ul className="side-panel-list top-list">
+            <li onClick={onNewChat}>
+              <img src={messagesIcon} alt="New Chat" className="list-icon" />
+              <span>New Chat</span>
+            </li>
+            <li
+              className="search-item"
+              onClick={() => !isSearching && setIsSearching(true)}
+            >
+              <img src={searchIcon} alt="Search Chats" className="list-icon" />
+              {isSearching ? (
+                <input
+                  className="search-input"
+                  type="text"
+                  placeholder="Search chats..."
+                  value={searchQuery}
+                  autoFocus
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setSearchQuery(value);
+                    if (!value) setAppliedSearchQuery("");
+                  }}
+                  onBlur={() => {
+                    if (!searchQuery) setIsSearching(false);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") {
+                      setSearchQuery("");
+                      setAppliedSearchQuery("");
+                      setIsSearching(false);
+                    }
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      setAppliedSearchQuery(searchQuery);
+                    }
+                  }}
+                />
+              ) : (
+                <span>Search Chats</span>
               )}
+            </li>
+          </ul>
 
-              {visibleChats.map((chat) => (
-                <li
-                  key={chat.id}
-                  className={`chat-item ${
-                    chat.id === activeChatId ? "active" : ""
-                  }`}
-                  onClick={() => onSelectChat(chat.id)}
-                >
-                  {chat.title}
-                </li>
-              ))}
+          {/* Chat Section */}
+          <div className="chat-section">
+            <div className="your-chats-label">Your Chats</div>
+            <div className={`chat-list-container ${shouldScroll ? "scrollable" : ""}`}>
+              <ul className="side-panel-list">
+                {visibleChats.length === 0 && (
+                  <li className="chat-item">No chats yet</li>
+                )}
+                {visibleChats.map((chat) => (
+                  <li
+                    key={chat.id}
+                    className={`chat-item ${chat.id === activeChatId ? "active" : ""}`}
+                    onClick={() => onSelectChat(chat.id)}
+                  >
+                    {chat.title}
+                  </li>
+                ))}
+                {filteredChats.length > MAX_VISIBLE_CHATS && (
+                  <li
+                    className="chat-item more-item"
+                    onClick={() => setShowAllChats((prev) => !prev)}
+                  >
+                    {showAllChats ? "Show Less ↑" : `More → (${filteredChats.length - MAX_VISIBLE_CHATS})`}
+                  </li>
+                )}
+              </ul>
+            </div>
+          </div>
 
-              {filteredChats.length > MAX_VISIBLE_CHATS && (
-                <li
-                  className="chat-item more-item"
-                  onClick={() =>
-                    setShowAllChats((prev) => !prev)
-                  }
-                >
-                  {showAllChats
-                    ? "Show Less ↑"
-                    : `More → (${filteredChats.length - MAX_VISIBLE_CHATS})`}
-                </li>
-              )}
-            </ul>
+          {/* Settings button */}
+          <ul className="side-panel-list bottom-list">
+            <li onClick={() => setShowSettings(true)}>
+              <img src={settingsIcon} alt="Settings" className="list-icon" />
+              <span>Settings</span>
+            </li>
+          </ul>
+
+        </div>
+      </div>
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="settings-overlay" onClick={() => setShowSettings(false)}>
+          <div className="settings-modal" onClick={(e) => e.stopPropagation()}>
+            <h2 className="settings-title">Settings</h2>
+
+            <button
+              className="settings-option"
+              onClick={() => setTextSize("small")}
+            >
+              Small Text
+            </button>
+
+            <button
+              className="settings-option"
+              onClick={() => setTextSize("medium")}
+            >
+              Medium Text
+            </button>
+
+            <button
+              className="settings-option"
+              onClick={() => setTextSize("large")}
+            >
+              Large Text
+            </button>
+
+            <button
+              className="settings-option"
+              onClick={() => {
+                if (clearChat) clearChat(); // call the function from props
+                setShowSettings(false);      // close the modal
+              }}
+            >
+              🗑 Clear Chat History
+            </button>
+
+            <button className="settings-option version">
+              One-Stop v1.0
+            </button>
           </div>
         </div>
-
-        <ul className="side-panel-list bottom-list">
-          <li>
-            <img src={settingsIcon} alt="Settings" className="list-icon" />
-            <span>Settings</span>
-          </li>
-        </ul>
-
-      </div>
-    </div>
+      )}
+    </>
   );
 };
 

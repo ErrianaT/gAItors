@@ -66,6 +66,16 @@ function Home() {
     );
   };
 
+  const clearChat = () => {
+    const newChat: Chat = {
+      id: crypto.randomUUID(),
+      title: "Chat 1",
+      messages: [],
+    };
+    setChats([newChat]);
+    setActiveChatId(newChat.id);
+  };
+
   const activeChat = chats.find(chat => chat.id === activeChatId);
 
   return (
@@ -79,6 +89,7 @@ function Home() {
         activeChatId={activeChatId} 
         onSelectChat={setActiveChatId}
         onNewChat={createNewChat}
+        clearChat={clearChat}
       />
 
       <div className="chat-wrapper">

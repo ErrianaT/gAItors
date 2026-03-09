@@ -9,6 +9,7 @@ function Home() {
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
   const [chats, setChats] = useState<Chat[]>([]);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
 
   const toggleSidePanel = () => setIsSidePanelOpen(prev => !prev);
 
@@ -80,7 +81,11 @@ function Home() {
 
   return (
     <div className="app-container">
-      <NavBar isSidePanelOpen={isSidePanelOpen} onMenuClick={toggleSidePanel}/>
+      <NavBar
+        isSidePanelOpen={isSidePanelOpen}
+        onMenuClick={toggleSidePanel}
+        onSettingsClick={() => setShowSettings(true)}
+      />
 
       <SidePanel
         isOpen={isSidePanelOpen}
@@ -90,6 +95,8 @@ function Home() {
         onSelectChat={setActiveChatId}
         onNewChat={createNewChat}
         clearChat={clearChat}
+        showSettings={showSettings}       // pass down state
+        setShowSettings={setShowSettings}
       />
 
       <div className="chat-wrapper">

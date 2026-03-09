@@ -89,7 +89,7 @@
   max-width: 70%;
   padding: 12px 16px;
   border-radius: 18px;
-  font-size: 14px;
+  font-size: 1em;
   word-wrap: break-word;
   display: flex;
   align-items: center;
@@ -119,6 +119,7 @@
   height: 20px;
   background-color: #ccc;
   border-radius: 8px;
+  font-size: 1em;
 }
 
 .chat-box {

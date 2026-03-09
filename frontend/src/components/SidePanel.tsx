@@ -14,6 +14,8 @@ interface SidePanelProps {
   onNewChat: () => void;
   activeChatId: string | null;
   clearChat?: () => void;
+  showSettings: boolean;
+  setShowSettings: (value: boolean) => void;
 }
 
 const MAX_VISIBLE_CHATS = 8;
@@ -27,12 +29,13 @@ const SidePanel: React.FC<SidePanelProps> = ({
   onNewChat,
   activeChatId,
   clearChat,
+  showSettings,       
+  setShowSettings, 
 }) => {
   const [showAllChats, setShowAllChats] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [appliedSearchQuery, setAppliedSearchQuery] = useState("");
-  const [showSettings, setShowSettings] = useState(false);
   const [textSize, setTextSize] = useState<"small" | "medium" | "large">("medium");
 
   const panelRef = useRef<HTMLDivElement>(null);

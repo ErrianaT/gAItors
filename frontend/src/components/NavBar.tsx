@@ -6,9 +6,10 @@ import menuIcon from "../assets/menuIcon.png";
 interface NavBarProps {
   isSidePanelOpen: boolean;
   onMenuClick: () => void;
+  onSettingsClick: () => void;
 }
 
-const NavBar: React.FC<NavBarProps> = ({ onMenuClick }) => {
+const NavBar: React.FC<NavBarProps> = ({ onMenuClick, onSettingsClick }) => {
   const [isOpen, setIsOpen] = useState(false);
   
   const menuRef = useRef<HTMLDivElement>(null);
@@ -50,7 +51,7 @@ const NavBar: React.FC<NavBarProps> = ({ onMenuClick }) => {
         {isOpen && (
           <div className="profile-dropdown">
             <button>Profile</button>
-            <button>Settings</button>
+            <button onClick={onSettingsClick}>Settings</button>
             <button>Logout</button>
           </div>
         )}

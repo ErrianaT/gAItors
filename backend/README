@@ -14,7 +14,7 @@ Clone the projcet
         ./compile.bat
         ./run.bat
 
-    1.3 rts-mcp-server
+    1.3 rag-mcp-server
         cd backend/rag-mcp-server
         ./compile.bat
         ./run.bat
@@ -30,4 +30,5 @@ How to test backend?
 Install Bruno  (https://www.usebruno.com/downloads)
 Click on Collection -> Open Collection 
 Select backend/bruno
+
 Select testChat

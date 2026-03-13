@@ -67,4 +67,3 @@ func getMcpServer() *server.Server {
 
 	return mcpServer
 }
-

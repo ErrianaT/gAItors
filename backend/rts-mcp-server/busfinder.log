@@ -1,0 +1,160 @@
+2026/03/06 10:01:56 Static fallback: failed to load stops.txt: open ../data/stops.txt: The system cannot find the path specified.
+2026/03/06 10:01:56 Static fallback: failed to load stop_times.txt: open ../data/stop_times.txt: The system cannot find the path specified.
+2026/03/06 10:09:46 CallToolRequest: origin="The Hub" dest="Physics Building" intent="NEXT_BUS"
+2026/03/06 10:09:46 TransitClient created with API key (len=64)
+2026/03/06 10:11:52 CallToolRequest: origin="Reitz Union" dest="Library West" intent="NEXT_BUS"
+2026/03/06 10:11:52 TransitClient created with API key (len=64)
+2026/03/06 10:12:53 CallToolRequest: origin="Reitz Union" dest="" intent="LIST_BUSES"
+2026/03/06 10:22:56 Loaded 952 GTFS stops from ../data/stops.txt
+2026/03/06 10:22:56 Indexed 91516 stop_times from ../data/stop_times.txt into 3409 trips
+2026/03/06 10:23:30 CallToolRequest: origin="Reitz Union" dest="" intent="LIST_BUSES"
+2026/03/06 10:25:02 CallToolRequest: origin="Reitz Union" dest="" intent="LIST_BUSES"
+2026/03/06 10:25:54 CallToolRequest: origin="Reitz Union" dest="Library West" intent="NEXT_BUS"
+2026/03/06 10:25:54 TransitClient created with API key (len=64)
+2026/03/06 10:25:54 GTFS fuzzy resolve OK: input="Reitz Union" → "Reitz Union" (score=1.000)
+2026/03/06 10:40:26 CallToolRequest: origin="Reitz Union" dest="Butler Plaza Transfer Station" intent="NEXT_BUS"
+2026/03/06 10:40:26 TransitClient created with API key (len=64)
+2026/03/06 10:40:26 GTFS fuzzy resolve OK: input="Reitz Union" → "Reitz Union" (score=1.000)
+2026/03/06 10:40:26 GTFS fuzzy resolve OK: input="Butler Plaza Transfer Station" → "Butler Plaza Transfer Station" (score=1.000)
+2026/03/06 10:40:26 GTFS origin resolved: input="Reitz Union" → "Reitz Union" (lat=29.645140 lon=-82.346983)
+2026/03/06 10:40:26 GTFS destination resolved: input="Butler Plaza Transfer Station" → "Butler Plaza Transfer Station" (lat=29.625154 lon=-82.387890)
+2026/03/06 10:40:26 Calling nearby_stops for lat=29.645140 lon=-82.346983 radius=100m (RTSFL only)
+2026/03/06 10:40:26 HTTP GET /v3/public/nearby_stops?lat=29.645140&lon=-82.346983&radius=100
+2026/03/06 10:40:27 nearby_stops RTSFL best match at radius=100m: GSID=RTSFL:12261 name="Reitz Union" dist=1.00
+2026/03/06 10:40:27 Calling nearby_stops for lat=29.625154 lon=-82.387890 radius=100m (RTSFL only)
+2026/03/06 10:40:27 HTTP GET /v3/public/nearby_stops?lat=29.625154&lon=-82.387890&radius=100
+2026/03/06 10:40:27 nearby_stops RTSFL best match at radius=100m: GSID=RTSFL:11769 name="Butler Plaza Transfer Station" dist=1.00
+2026/03/06 10:40:27 Nearby origin: GTFS="Reitz Union" → API="Reitz Union" (GSID=RTSFL:12261)
+2026/03/06 10:40:27 Nearby destination: GTFS="Butler Plaza Transfer Station" → API="Butler Plaza Transfer Station"
+2026/03/06 10:40:27 Realtime fast-path search: originGSID=RTSFL:12261 originName="Reitz Union" destName="Butler Plaza Transfer Station"
+2026/03/06 10:40:27 HTTP GET /v3/public/stop_departures?global_stop_id=RTSFL%3A12261&max_num_departures=20&remove_cancelled=true&should_update_realtime=true
+2026/03/06 10:40:27 stop_departures returned 7 routes
+2026/03/06 10:40:27 Route 37 (Reitz Union to Butler Plaza Transfer Sta) has 1 itineraries
+2026/03/06 10:40:27   Itinerary headsign="Butler Plaza" has 10 schedule items
+2026/03/06 10:40:27 Route 21 (Reitz Union To Liv Apartments) has 1 itineraries
+2026/03/06 10:40:27   Itinerary headsign="Liv Apts" has 10 schedule items
+2026/03/06 10:40:27 Route 126 (UF E / W Circulator (Lakeside To Sorority Row)) has 1 itineraries
+2026/03/06 10:40:27   Itinerary headsign="Lakeside" has 10 schedule items
+2026/03/06 10:40:27 Route 20 (Reitz Union To Oaks Mall) has 1 itineraries
+2026/03/06 10:40:27   Itinerary headsign="Oaks Mall" has 9 schedule items
+2026/03/06 10:40:27 Route 38 (Reitz Union to Gainesville Place) has 2 itineraries
+2026/03/06 10:40:27   Itinerary headsign="Gainesville Place" has 10 schedule items
+2026/03/06 10:40:27   Itinerary headsign="The Hub" has 10 schedule items
+2026/03/06 10:40:27 Route 9 (Reitz Union To Hunters Run) has 2 itineraries
+2026/03/06 10:40:27   Itinerary headsign="Hunters Run" has 10 schedule items
+2026/03/06 10:40:27   Itinerary headsign="The Hub" has 10 schedule items
+2026/03/06 10:40:27 Route 52 (Reitz Union to Jonesville) has 1 itineraries
+2026/03/06 10:40:27   Itinerary headsign="Jonesville" has 7 schedule items
+2026/03/06 10:40:27 Realtime fast-path produced 0 matching direct trips
+2026/03/06 10:40:27 Realtime fast-path failed or no trips: no direct realtime trips found
+2026/03/06 10:41:31 CallToolRequest: origin="The Hub" dest="Reitz Union" intent="NEXT_BUS"
+2026/03/06 10:41:31 TransitClient created with API key (len=64)
+2026/03/06 10:41:31 GTFS fuzzy resolve OK: input="The Hub" → "The HUB" (score=1.000)
+2026/03/06 10:41:31 GTFS fuzzy resolve OK: input="Reitz Union" → "Reitz Union" (score=1.000)
+2026/03/06 10:41:31 GTFS origin resolved: input="The Hub" → "The HUB" (lat=29.648530 lon=-82.344960)
+2026/03/06 10:41:31 GTFS destination resolved: input="Reitz Union" → "Reitz Union" (lat=29.645140 lon=-82.346983)
+2026/03/06 10:41:31 Calling nearby_stops for lat=29.648530 lon=-82.344960 radius=100m (RTSFL only)
+2026/03/06 10:41:31 HTTP GET /v3/public/nearby_stops?lat=29.648530&lon=-82.344960&radius=100
+2026/03/06 10:41:31 nearby_stops RTSFL best match at radius=100m: GSID=RTSFL:13082 name="The HUB" dist=1.00
+2026/03/06 10:41:31 Calling nearby_stops for lat=29.645140 lon=-82.346983 radius=100m (RTSFL only)
+2026/03/06 10:41:31 HTTP GET /v3/public/nearby_stops?lat=29.645140&lon=-82.346983&radius=100
+2026/03/06 10:41:31 nearby_stops RTSFL best match at radius=100m: GSID=RTSFL:12261 name="Reitz Union" dist=1.00
+2026/03/06 10:41:31 Nearby origin: GTFS="The HUB" → API="The HUB" (GSID=RTSFL:13082)
+2026/03/06 10:41:31 Nearby destination: GTFS="Reitz Union" → API="Reitz Union"
+2026/03/06 10:41:31 Realtime fast-path search: originGSID=RTSFL:13082 originName="The HUB" destName="Reitz Union"
+2026/03/06 10:41:31 HTTP GET /v3/public/stop_departures?global_stop_id=RTSFL%3A13082&max_num_departures=20&remove_cancelled=true&should_update_realtime=true
+2026/03/06 10:41:31 stop_departures returned 6 routes
+2026/03/06 10:41:31 Route 118 (P&R 1 (Cultural Plaza) To The Hub) has 1 itineraries
+2026/03/06 10:41:31   Itinerary headsign="Cultural Plaza" has 9 schedule items
+2026/03/06 10:41:31 Route 126 (UF E / W Circulator (Lakeside To Sorority Row)) has 1 itineraries
+2026/03/06 10:41:31   Itinerary headsign="Sorority Row" has 10 schedule items
+2026/03/06 10:41:31 Route 33 (Butler Plaza - The Standard) has 1 itineraries
+2026/03/06 10:41:31   Itinerary headsign="Butler Plaza" has 9 schedule items
+2026/03/06 10:41:31 Route 38 (Reitz Union to Gainesville Place) has 1 itineraries
+2026/03/06 10:41:31   Itinerary headsign="The Hub" has 10 schedule items
+2026/03/06 10:41:31     Fast-path match: route=38 headsign="The Hub" departure=1772811900 isRealtime=false
+2026/03/06 10:41:31 Route 9 (Reitz Union To Hunters Run) has 1 itineraries
+2026/03/06 10:41:31   Itinerary headsign="The Hub" has 10 schedule items
+2026/03/06 10:41:31     Fast-path match: route=9 headsign="The Hub" departure=1772812080 isRealtime=false
+2026/03/06 10:41:31 Route 12 (The Hub to Dollar General) has 2 itineraries
+2026/03/06 10:41:31   Itinerary headsign="Dollar General" has 10 schedule items
+2026/03/06 10:41:31   Itinerary headsign="The Hub" has 10 schedule items
+2026/03/06 10:41:31 Realtime fast-path produced 2 matching direct trips
+2026/03/09 14:16:26 Loaded 952 GTFS stops from ../data/stops.txt
+2026/03/09 14:16:26 Indexed 91516 stop_times from ../data/stop_times.txt into 3409 trips
+2026/03/09 14:17:52 CallToolRequest: origin="Reitz Union" dest="Butler Plaza Transfer Station" intent="NEXT_BUS"
+2026/03/09 14:17:52 TransitClient created with API key (len=64)
+2026/03/09 14:17:52 GTFS fuzzy resolve OK: input="Reitz Union" → "Reitz Union" (score=1.000)
+2026/03/09 14:17:52 GTFS fuzzy resolve OK: input="Butler Plaza Transfer Station" → "Butler Plaza Transfer Station" (score=1.000)
+2026/03/09 14:17:52 GTFS origin resolved: input="Reitz Union" → "Reitz Union" (lat=29.645140 lon=-82.346983)
+2026/03/09 14:17:52 GTFS destination resolved: input="Butler Plaza Transfer Station" → "Butler Plaza Transfer Station" (lat=29.625154 lon=-82.387890)
+2026/03/09 14:17:52 Calling nearby_stops for lat=29.645140 lon=-82.346983 radius=100m (RTSFL only)
+2026/03/09 14:17:52 HTTP GET /v3/public/nearby_stops?lat=29.645140&lon=-82.346983&radius=100
+2026/03/09 14:17:52 nearby_stops RTSFL best match at radius=100m: GSID=RTSFL:12261 name="Reitz Union" dist=1.00
+2026/03/09 14:17:52 Calling nearby_stops for lat=29.625154 lon=-82.387890 radius=100m (RTSFL only)
+2026/03/09 14:17:52 HTTP GET /v3/public/nearby_stops?lat=29.625154&lon=-82.387890&radius=100
+2026/03/09 14:17:52 nearby_stops RTSFL best match at radius=100m: GSID=RTSFL:11769 name="Butler Plaza Transfer Station" dist=1.00
+2026/03/09 14:17:52 Nearby origin: GTFS="Reitz Union" → API="Reitz Union" (GSID=RTSFL:12261)
+2026/03/09 14:17:52 Nearby destination: GTFS="Butler Plaza Transfer Station" → API="Butler Plaza Transfer Station"
+2026/03/09 14:17:52 Realtime fast-path search: originGSID=RTSFL:12261 originName="Reitz Union" destName="Butler Plaza Transfer Station"
+2026/03/09 14:17:52 HTTP GET /v3/public/stop_departures?global_stop_id=RTSFL%3A12261&max_num_departures=20&remove_cancelled=true&should_update_realtime=true
+2026/03/09 14:17:52 stop_departures returned 7 routes
+2026/03/09 14:17:52 Route 20 (Reitz Union To Oaks Mall) has 1 itineraries
+2026/03/09 14:17:52   Itinerary headsign="Oaks Mall" has 9 schedule items
+2026/03/09 14:17:52 Route 126 (UF E / W Circulator (Lakeside To Sorority Row)) has 1 itineraries
+2026/03/09 14:17:52   Itinerary headsign="Lakeside" has 10 schedule items
+2026/03/09 14:17:52 Route 9 (Reitz Union To Hunters Run) has 2 itineraries
+2026/03/09 14:17:52   Itinerary headsign="Hunters Run" has 10 schedule items
+2026/03/09 14:17:52   Itinerary headsign="The Hub" has 10 schedule items
+2026/03/09 14:17:52 Route 37 (Reitz Union to Butler Plaza Transfer Sta) has 1 itineraries
+2026/03/09 14:17:52   Itinerary headsign="Butler Plaza" has 9 schedule items
+2026/03/09 14:17:52 Route 38 (Reitz Union to Gainesville Place) has 2 itineraries
+2026/03/09 14:17:52   Itinerary headsign="Gainesville Place" has 10 schedule items
+2026/03/09 14:17:52   Itinerary headsign="The Hub" has 10 schedule items
+2026/03/09 14:17:52 Route 21 (Reitz Union To Liv Apartments) has 1 itineraries
+2026/03/09 14:17:52   Itinerary headsign="Liv Apts" has 9 schedule items
+2026/03/09 14:17:52 Route 52 (Reitz Union to Jonesville) has 1 itineraries
+2026/03/09 14:17:52   Itinerary headsign="Jonesville" has 10 schedule items
+2026/03/09 14:17:52 Realtime fast-path produced 0 matching direct trips
+2026/03/09 14:17:52 Realtime fast-path failed or no trips: no direct realtime trips found
+2026/03/09 14:19:01 CallToolRequest: origin="Rosa Parks RTS Downtown Station" dest="Oaks Mall" intent="NEXT_BUS"
+2026/03/09 14:19:01 TransitClient created with API key (len=64)
+2026/03/09 14:19:01 GTFS fuzzy resolve OK: input="Rosa Parks RTS Downtown Station" → "Rosa Parks RTS Downtown Station" (score=1.000)
+2026/03/09 14:19:01 GTFS fuzzy resolve OK: input="Oaks Mall" → "Oaks Mall" (score=1.000)
+2026/03/09 14:19:01 GTFS origin resolved: input="Rosa Parks RTS Downtown Station" → "Rosa Parks RTS Downtown Station" (lat=29.645567 lon=-82.322697)
+2026/03/09 14:19:01 GTFS destination resolved: input="Oaks Mall" → "Oaks Mall" (lat=29.659514 lon=-82.413875)
+2026/03/09 14:19:01 Calling nearby_stops for lat=29.645567 lon=-82.322697 radius=100m (RTSFL only)
+2026/03/09 14:19:01 HTTP GET /v3/public/nearby_stops?lat=29.645567&lon=-82.322697&radius=100
+2026/03/09 14:19:02 nearby_stops RTSFL best match at radius=100m: GSID=RTSFL:11797 name="Rosa Parks RTS Downtown Station" dist=1.00
+2026/03/09 14:19:02 Calling nearby_stops for lat=29.659514 lon=-82.413875 radius=100m (RTSFL only)
+2026/03/09 14:19:02 HTTP GET /v3/public/nearby_stops?lat=29.659514&lon=-82.413875&radius=100
+2026/03/09 14:19:02 nearby_stops RTSFL best match at radius=100m: GSID=RTSFL:12732 name="Oaks Mall" dist=0.00
+2026/03/09 14:19:02 Nearby origin: GTFS="Rosa Parks RTS Downtown Station" → API="Rosa Parks RTS Downtown Station" (GSID=RTSFL:11797)
+2026/03/09 14:19:02 Nearby destination: GTFS="Oaks Mall" → API="Oaks Mall"
+2026/03/09 14:19:02 Realtime fast-path search: originGSID=RTSFL:11797 originName="Rosa Parks RTS Downtown Station" destName="Oaks Mall"
+2026/03/09 14:19:02 HTTP GET /v3/public/stop_departures?global_stop_id=RTSFL%3A11797&max_num_departures=20&remove_cancelled=true&should_update_realtime=true
+2026/03/09 14:19:02 stop_departures returned 10 routes
+2026/03/09 14:19:02 Route 15 (Downtown Sta To NW 13 Street / NW 23 Av) has 2 itineraries
+2026/03/09 14:19:02   Itinerary headsign="NW 13th St" has 10 schedule items
+2026/03/09 14:19:02   Itinerary headsign="Downtown Station" has 9 schedule items
+2026/03/09 14:19:02 Route 26 (Downtown Station to Airport) has 1 itineraries
+2026/03/09 14:19:02   Itinerary headsign="Airport" has 10 schedule items
+2026/03/09 14:19:02 Route 10 (Downtown Station To Santa Fe College) has 1 itineraries
+2026/03/09 14:19:02   Itinerary headsign="Santa Fe College" has 10 schedule items
+2026/03/09 14:19:02 Route 1 (Downtown Station to Butler Plaza) has 1 itineraries
+2026/03/09 14:19:02   Itinerary headsign="Butler Plaza" has 9 schedule items
+2026/03/09 14:19:02 Route 5 (Downtown Station to Oaks Mall) has 1 itineraries
+2026/03/09 14:19:02   Itinerary headsign="Oaks Mall" has 10 schedule items
+2026/03/09 14:19:02     Fast-path match: route=5 headsign="Oaks Mall" departure=1773082200 isRealtime=false
+2026/03/09 14:19:02 Route 17 (Beaty Towers To Rosa Parks Downtown Sta) has 2 itineraries
+2026/03/09 14:19:02   Itinerary headsign="Downtown Station" has 10 schedule items
+2026/03/09 14:19:02   Itinerary headsign="Beaty Towers" has 10 schedule items
+2026/03/09 14:19:02 Route 3 (Downtown Station to N Main Post Office) has 1 itineraries
+2026/03/09 14:19:02   Itinerary headsign="Post Office" has 10 schedule items
+2026/03/09 14:19:02 Route 6 (Downtown Sta to N Walmart Supercenter) has 1 itineraries
+2026/03/09 14:19:02   Itinerary headsign="N Walmart" has 10 schedule items
+2026/03/09 14:19:02 Route 7 (Downtown Station to Eastwood Meadows) has 1 itineraries
+2026/03/09 14:19:02   Itinerary headsign="Eastwood Meadows" has 10 schedule items
+2026/03/09 14:19:02 Route 11 (Downtown Station To Eastwood Meadows) has 1 itineraries
+2026/03/09 14:19:02   Itinerary headsign="Eastwood Meadows" has 10 schedule items
+2026/03/09 14:19:02 Realtime fast-path produced 1 matching direct trips

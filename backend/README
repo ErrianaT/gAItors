@@ -1,7 +1,16 @@
 How to setup backend?
 
+Step 1:
+-------
 Clone the projcet
 
+Step 2:
+-------
+Run project.bat from root folder of the cloned project.
+./project.bat
+This will bring up all mcp servers and mcp client
+
+Optional: If you choose to test components individually. project.bat has all the below commands in a single file.
 1. Bring up MCP Servers
 
     1.1 uf-mcp-server
@@ -16,7 +25,6 @@ Clone the projcet
 
     1.3 rag-mcp-server
         cd backend/rag-mcp-server
-        ./compile.bat
         ./run.bat
 
 2. Bring up mcp-client
@@ -25,6 +33,8 @@ cd backend/mcp-client
 ./compile.bat
 ./run.bat
 
+Step 3:
+-------
 How to test backend?
 
 Install Bruno  (https://www.usebruno.com/downloads)

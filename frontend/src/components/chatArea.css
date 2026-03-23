@@ -1,64 +1,60 @@
+/* --- 1. Main Chat Layout --- */
 .chat-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: 1000px; /* width of conversation space */
+  max-width: 1000px;
   gap: 20px;
   margin-top: -70px;
 }
 
-.title {
-  font-size: 30px;
-  color: #000a8f;
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-.welcome-gator {
-  width: 120px;
-  height: auto;
-  align-items: center;
-}
-
+/* --- 2. Welcome Area (Home State) --- */
 .welcome-area {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 20px;
   opacity: 1;
-  transition: opacity 0.6s ease;
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
 .welcome-area.fade-out {
   opacity: 0;
+  transform: translateY(-10px);
   pointer-events: none;
 }
 
-.fade-out {
-  opacity: 0;
-  transform: translateY(-10px);
+.title {
+  font-size: 30px;
+  color: #0021a5; /* Standard UF Blue */
 }
 
+.welcome-gator {
+  width: 120px;
+  height: auto;
+}
+
+/* --- 3. Conversation Display --- */
 .messages-container {
   flex: 1;
-  width: 700px;
-  max-height: 400px; 
+  width: 100%;
+  max-width: 700px;
+  max-height: 500px; 
   overflow-y: auto;
-  display: flex;
-  gap: 16px;
+  padding-right: 10px;
 }
 
+/* Scrollbar Styling */
 .messages-container::-webkit-scrollbar {
   width: 4px;
 }
-
 .messages-container::-webkit-scrollbar-thumb {
   background-color: #ccc;
   border-radius: 3px;
 }
 
 .messages {
-  width: 700px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -67,12 +63,12 @@
 .message-row {
   display: flex;
   align-items: flex-start;
+  width: 100%;
 }
 
 .message-row.user {
   justify-content: flex-end;
 }
-
 
 .message-row.bot {
   justify-content: flex-start;
@@ -83,53 +79,91 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
+  object-fit: cover;
 }
 
+/* --- 4. Chat Bubbles --- */
 .message-bubble {
-  max-width: 70%;
+  max-width: 80%;
   padding: 12px 16px;
-  border-radius: 18px;
-  font-size: 1em;
+  font-size: 0.95rem;
+  line-height: 1.5;
   word-wrap: break-word;
-  display: flex;
-  align-items: center;
-  min-height: 20px;
+  position: relative;
 }
 
 .message-bubble.user {
-  background-color: #000a8f;
+  background-color: #0021a5; /* UF Blue */
   color: white;
-  border-bottom-right-radius: 6px;
-  border-bottom-left-radius: 18px;
-  border-top-right-radius: 18px;
-  border-top-left-radius: 18px;
+  border-radius: 18px 18px 2px 18px; /* Tail on bottom-right */
 }
 
 .message-bubble.bot {
-  background-color: #e4e4e4;
-  color: black;
-  border-bottom-left-radius: 6px;
-  border-bottom-right-radius: 18px;
-  border-top-left-radius: 18px;
-  border-top-right-radius: 18px;
+  background: #ffffff;
+  color: #333;
+  border: 1px solid #e0e0e0;
+  border-radius: 18px 18px 18px 2px; /* Tail on bottom-left */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.bot-placeholder {
-  width: 120px;
-  height: 20px;
-  background-color: #ccc;
-  border-radius: 8px;
-  font-size: 1em;
+/* --- 5. Professor Card Styles (Inside Bot Bubble) --- */
+.formatted-bot-msg {
+  display: flex;
+  flex-direction: column;
 }
 
+.prof-title {
+  margin: 0 0 5px 0;
+  color: #0021a5;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.star-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.star-container {
+  position: relative;
+  display: inline-block;
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.star-empty { color: #e0e0e0; }
+.star-filled {
+  color: #fa4616; /* UF Orange */
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.rating-number {
+  font-size: 0.85rem;
+  color: #666;
+  margin-left: 8px;
+}
+
+.prof-description {
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* --- 6. Input Area --- */
 .chat-box {
-  width: 700px;
-  min-height: 80px;
+  width: 100%;
+  max-width: 700px;
+  min-height: 60px;
   background-color: #f0f0f0;
   border-radius: 20px;
-  padding: 14px 16px;
+  padding: 10px 16px;
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end; /* Keeps button at bottom */
   gap: 10px;
 }
 
@@ -141,27 +175,39 @@
   outline: none;
   font-size: 16px;
   font-family: inherit;
-  padding-top: 10px;
-  padding-left: 15px;
-}
-
-.chat-input::placeholder {
-  font-size: 16px;
-  color: #0d11866c;
+  padding: 8px 0;
 }
 
 .send-button {
-  align-self: flex-end;
-  background-color: #000a8f;
+  background-color: #0021a5;
   color: white;
   border: none;
-  padding: 8px 14px;
+  padding: 8px 16px;
   border-radius: 12px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  font-weight: bold;
+  transition: all 0.2s ease;
 }
 
-.send-button:hover {
-  background-color: #fc7600;
+.send-button:hover:not(:disabled) {
+  background-color: #fa4616;
+  transform: translateY(-1px);
 }
 
+.send-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --- 7. Animations --- */
+.typing-dots {
+  font-style: italic;
+  color: #888;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}

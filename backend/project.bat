@@ -8,7 +8,7 @@ SET LLM_TOKEN=<LLM_TOKEN>
 
 echo "RAG MCP Serevr Starting..."
 SET GEMINI_API_KEY=<GEMINI_API_KEY>
-SET FILE_LOCATION=C:\Downloads\senior-project-demo\gemini-file-search\one-stop
+SET FILE_LOCATION="/Users/errianathomas/Documents/GitHub/gAItors/"
 ECHO ============================================
 ECHO   Starting RAG MCP server
 ECHO   Time: %DATE% %TIME%
@@ -58,7 +58,7 @@ timeout /t 2 >nul
 @ECHO OFF
 
 echo "mcp client Starting..."
-SET APP_ROOT=C:\Downloads\DIY\agentic-ai\mcp-client\AppRoot
+SET APP_ROOT="/Users/errianathomas/Documents/GitHub/gAItors/"
 SET KUBE_MCP_URL=http://localhost:9090/mcp
 SET RTS_MCP_URL=http://localhost:9091/mcp
 SET FILE_SEARCH_MCP_URL=http://localhost:9092/mcp

@@ -1,4 +1,3 @@
-/* --- 1. Main Chat Layout --- */
 .chat-container {
   display: flex;
   flex-direction: column;
@@ -9,7 +8,6 @@
   margin-top: -70px;
 }
 
-/* --- 2. Welcome Area (Home State) --- */
 .welcome-area {
   display: flex;
   flex-direction: column;
@@ -27,7 +25,7 @@
 
 .title {
   font-size: 30px;
-  color: #0021a5; /* Standard UF Blue */
+  color: #0021a5; 
 }
 
 .welcome-gator {
@@ -35,7 +33,6 @@
   height: auto;
 }
 
-/* --- 3. Conversation Display --- */
 .messages-container {
   flex: 1;
   width: 100%;
@@ -45,7 +42,6 @@
   padding-right: 10px;
 }
 
-/* Scrollbar Styling */
 .messages-container::-webkit-scrollbar {
   width: 4px;
 }
@@ -82,7 +78,6 @@
   object-fit: cover;
 }
 
-/* --- 4. Chat Bubbles --- */
 .message-bubble {
   max-width: 80%;
   padding: 12px 16px;
@@ -93,20 +88,19 @@
 }
 
 .message-bubble.user {
-  background-color: #0021a5; /* UF Blue */
+  background-color: #0021a5; 
   color: white;
-  border-radius: 18px 18px 2px 18px; /* Tail on bottom-right */
+  border-radius: 18px 18px 2px 18px; 
 }
 
 .message-bubble.bot {
   background: #ffffff;
   color: #333;
   border: 1px solid #e0e0e0;
-  border-radius: 18px 18px 18px 2px; /* Tail on bottom-left */
+  border-radius: 18px 18px 18px 2px; 
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-/* --- 5. Professor Card Styles (Inside Bot Bubble) --- */
 .formatted-bot-msg {
   display: flex;
   flex-direction: column;
@@ -135,7 +129,7 @@
 
 .star-empty { color: #e0e0e0; }
 .star-filled {
-  color: #fa4616; /* UF Orange */
+  color: #fa4616; 
   position: absolute;
   top: 0;
   left: 0;
@@ -154,7 +148,6 @@
   line-height: 1.5;
 }
 
-/* --- 6. Input Area --- */
 .chat-box {
   width: 100%;
   max-width: 700px;
@@ -163,7 +156,7 @@
   border-radius: 20px;
   padding: 10px 16px;
   display: flex;
-  align-items: flex-end; /* Keeps button at bottom */
+  align-items: flex-end; 
   gap: 10px;
 }
 

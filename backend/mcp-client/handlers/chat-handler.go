@@ -14,8 +14,10 @@ import (
 	"uf/mcp/pkg/mcp"
 
 	// Import agent adapters
+	"uf/mcp/agents/restaurants_agent"
 	"uf/mcp/agents/schedule_agent"
 	"uf/mcp/agents/transit_agent"
+	"uf/mcp/agents/weather_agent"
 
 	"github.com/ThinkInAIXYZ/go-mcp/protocol"
 	"github.com/tmc/langchaingo/llms/openai"
@@ -39,6 +41,18 @@ var AgentRegistry = map[string]llm.Agent{
 		Name: "Transit Agent",
 		SelectTool: func(ctx context.Context, model *openai.LLM, query string) (*llm.SelectedToolInfo, error) {
 			return transit_agent.SelectTransitTool(ctx, model, query)
+		},
+	},
+	"Weather Agent": {
+		Name: "Weather Agent",
+		SelectTool: func(ctx context.Context, model *openai.LLM, query string) (*llm.SelectedToolInfo, error) {
+			return weather_agent.SelectWeatherTool(ctx, model, query)
+		},
+	},
+	"Restaurants Agent": {
+		Name: "Restaurants Agent",
+		SelectTool: func(ctx context.Context, model *openai.LLM, query string) (*llm.SelectedToolInfo, error) {
+			return restaurants_agent.SelectRestaurantsTool(ctx, model, query)
 		},
 	},
 	"Chat Agent": {

@@ -164,3 +164,44 @@
 2026/03/25 11:18:15 TransitClient created with API key (len=9)
 2026/03/25 11:18:15 GTFS fuzzy resolve OK: input="Reitz Union" → "Reitz Union" (score=1.000)
 2026/03/25 11:26:50 CallToolRequest: origin="Reitz Union" dest="" intent="LIST_BUSES"
+2026/03/25 13:39:01 Loaded 952 GTFS stops from ../data/stops.txt
+2026/03/25 13:39:01 Indexed 91516 stop_times from ../data/stop_times.txt into 3409 trips
+2026/03/25 13:51:21 CallToolRequest: origin="Beaty Towers" dest="Downtown Station" intent="NEXT_BUS"
+2026/03/25 13:51:21 TransitClient created with API key (len=9)
+2026/03/25 13:51:21 GTFS fuzzy resolve OK: input="Beaty Towers" → "Beaty Towers" (score=1.000)
+2026/03/25 13:51:21 GTFS fuzzy resolve OK: input="Downtown Station" → "Downtown Library" (score=0.769)
+2026/03/25 13:51:21 GTFS origin resolved: input="Beaty Towers" → "Beaty Towers" (lat=29.644929 lon=-82.340175)
+2026/03/25 13:51:21 GTFS destination resolved: input="Downtown Station" → "Downtown Library" (lat=29.651766 lon=-82.322318)
+2026/03/25 13:51:21 Calling nearby_stops for lat=29.644929 lon=-82.340175 radius=100m (RTSFL only)
+2026/03/25 13:51:21 HTTP GET /v3/public/nearby_stops?lat=29.644929&lon=-82.340175&radius=100
+2026/03/25 13:51:21 HTTP GET /v3/public/nearby_stops returned status 401
+2026/03/25 13:59:53 Loaded 952 GTFS stops from ../data/stops.txt
+2026/03/25 13:59:53 Indexed 91516 stop_times from ../data/stop_times.txt into 3409 trips
+2026/03/25 14:01:12 CallToolRequest: origin="Beaty Towers" dest="Downtown Station" intent="NEXT_BUS"
+2026/03/25 14:01:12 TransitClient created with API key (len=64)
+2026/03/25 14:01:12 GTFS fuzzy resolve OK: input="Beaty Towers" → "Beaty Towers" (score=1.000)
+2026/03/25 14:01:12 GTFS fuzzy resolve OK: input="Downtown Station" → "Downtown Library" (score=0.769)
+2026/03/25 14:01:12 GTFS origin resolved: input="Beaty Towers" → "Beaty Towers" (lat=29.644929 lon=-82.340175)
+2026/03/25 14:01:12 GTFS destination resolved: input="Downtown Station" → "Downtown Library" (lat=29.651766 lon=-82.322318)
+2026/03/25 14:01:12 Calling nearby_stops for lat=29.644929 lon=-82.340175 radius=100m (RTSFL only)
+2026/03/25 14:01:12 HTTP GET /v3/public/nearby_stops?lat=29.644929&lon=-82.340175&radius=100
+2026/03/25 14:01:12 nearby_stops RTSFL best match at radius=100m: GSID=RTSFL:12488 name="Beaty Towers" dist=0.00
+2026/03/25 14:01:12 Calling nearby_stops for lat=29.651766 lon=-82.322318 radius=100m (RTSFL only)
+2026/03/25 14:01:12 HTTP GET /v3/public/nearby_stops?lat=29.651766&lon=-82.322318&radius=100
+2026/03/25 14:01:12 nearby_stops RTSFL best match at radius=100m: GSID=RTSFL:12388 name="Downtown Library" dist=1.00
+2026/03/25 14:01:12 Nearby origin: GTFS="Beaty Towers" → API="Beaty Towers" (GSID=RTSFL:12488)
+2026/03/25 14:01:12 Nearby destination: GTFS="Downtown Library" → API="Downtown Library"
+2026/03/25 14:01:12 Realtime fast-path search: originGSID=RTSFL:12488 originName="Beaty Towers" destName="Downtown Library"
+2026/03/25 14:01:12 HTTP GET /v3/public/stop_departures?global_stop_id=RTSFL%3A12488&max_num_departures=20&remove_cancelled=true&should_update_realtime=true
+2026/03/25 14:01:12 stop_departures returned 4 routes
+2026/03/25 14:01:12 Route 126 (UF E / W Circulator (Lakeside To Sorority Row)) has 1 itineraries
+2026/03/25 14:01:12   Itinerary headsign="Lakeside" has 10 schedule items
+2026/03/25 14:01:12 Route 13 (US 441 to Alight Apartments) has 1 itineraries
+2026/03/25 14:01:12   Itinerary headsign="US 441" has 9 schedule items
+2026/03/25 14:01:12 Route 17 (Beaty Towers To Rosa Parks Downtown Sta) has 2 itineraries
+2026/03/25 14:01:12   Itinerary headsign="Downtown Station" has 10 schedule items
+2026/03/25 14:01:12   Itinerary headsign="Beaty Towers" has 10 schedule items
+2026/03/25 14:01:12 Route 43 (UF Health to Santa Fe College) has 1 itineraries
+2026/03/25 14:01:12   Itinerary headsign="UF Health" has 10 schedule items
+2026/03/25 14:01:12 Realtime fast-path produced 0 matching direct trips
+2026/03/25 14:01:12 Realtime fast-path failed or no trips: no direct realtime trips found

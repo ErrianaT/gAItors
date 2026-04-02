@@ -205,3 +205,5 @@
 2026/03/25 14:01:12   Itinerary headsign="UF Health" has 10 schedule items
 2026/03/25 14:01:12 Realtime fast-path produced 0 matching direct trips
 2026/03/25 14:01:12 Realtime fast-path failed or no trips: no direct realtime trips found
+2026/04/02 17:40:01 Loaded 952 GTFS stops from ../data/stops.txt
+2026/04/02 17:40:01 Indexed 91516 stop_times from ../data/stop_times.txt into 3409 trips

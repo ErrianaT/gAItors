@@ -1,0 +1,15 @@
+body.text-small { font-size: 12px; }
+body.text-medium { font-size: 16px; }
+body.text-large { font-size: 20px; }
+
+body.text-small p, body.text-small span, body.text-small div, body.text-small li {
+  font-size: 0.85rem; 
+}
+
+body.text-medium p, body.text-medium span, body.text-medium div, body.text-medium li {
+  font-size: 1rem;
+}
+
+body.text-large p, body.text-large span, body.text-large div, body.text-large li {
+  font-size: 1.25rem;
+}

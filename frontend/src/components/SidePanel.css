@@ -177,20 +177,23 @@
   text-align: center;
 }
 
-body.text-small {
-  font-size: 12px;
+:root {
+  /* This sets the default fallback */
+  --app-font-size: 16px;
 }
 
-body.text-medium {
-  font-size: 16px;
+body {
+  /* Force the body to use the variable */
+  font-size: var(--app-font-size) !important;
 }
 
-body.text-large {
-  font-size: 20px;
-}
-
-body.text-small,
-body.text-medium,
-body.text-large {
-  transition: font-size 0.2s ease;
+/* Crucial: Ensure child elements inherit the size. 
+   If your .chat-item or .message-bubble has a hardcoded 'font-size: 14px', 
+   it will IGNORE your settings. Change them to use 'em' or 'inherit'.
+*/
+.chat-item, 
+.message-bubble, 
+.side-panel span,
+.standard-text {
+  font-size: 1em; /* 1em means '100% of the body font size' */
 }

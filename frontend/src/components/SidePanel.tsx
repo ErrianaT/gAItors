@@ -42,6 +42,19 @@ const SidePanel: React.FC<SidePanelProps> = ({
 
   // Update body font size class when textSize changes
   useEffect(() => {
+    const root = document.documentElement;
+    
+    // Map the textSize state to specific pixel values
+    const sizeMap = {
+      small: "13px",
+      medium: "16px",
+      large: "20px"
+    };
+
+    // This sets a global variable --app-font-size on the <html> tag
+    root.style.setProperty('--app-font-size', sizeMap[textSize]);
+    
+    // (Optional) Keep the class toggle if you still want it for specific styling
     document.body.classList.remove("text-small", "text-medium", "text-large");
     document.body.classList.add(`text-${textSize}`);
   }, [textSize]);

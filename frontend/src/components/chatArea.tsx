@@ -241,7 +241,6 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
     }
 
     // --- 4. Restaurants Logic ---
-    // --- 4. Universal Restaurant / Coffee Shop Logic (Line-by-Line Parser) ---
     if (text.includes("Rating:") || text.includes("Address:")) {
       // Split the text into blocks based on where a bolded name "**Name**" appears
       const blocks = text.split(/\n(?=\d+\.|\s*-?\s*\*\*)/g);

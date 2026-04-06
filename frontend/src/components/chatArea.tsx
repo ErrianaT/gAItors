@@ -147,7 +147,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
   };
 
   const renderMessageContent = (text: string) => {
-    // --- 2. Blue Phone / Safety Logic ---
+    // --- 1. Blue Phone / Safety Logic ---
     if (text.toLowerCase().includes("blue phone")) {
       const locationMatch = text.match(/at ([\w\s]+), located/i);
       const locationName = locationMatch ? locationMatch[1] : "Blue Phone Location";
@@ -239,8 +239,74 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
         </div>
       );
     }
+
+    // --- 4. Restaurants Logic ---
+    // --- 4. Universal Restaurant / Coffee Shop Logic (Line-by-Line Parser) ---
+    if (text.includes("Rating:") || text.includes("Address:")) {
+      // Split the text into blocks based on where a bolded name "**Name**" appears
+      const blocks = text.split(/\n(?=\d+\.|\s*-?\s*\*\*)/g);
+      const items: any[] = [];
+
+      blocks.forEach(block => {
+        // 1. Extract Name: Find the FIRST bolded string, then strip leading dashes/numbers
+        const nameMatch = block.match(/\*\*(.*?)\*\*/);
+        if (!nameMatch) return;
+        
+        // Clean name: removes leading "- ", "1. ", and trailing " - Indian Restaurant"
+        let cleanName = nameMatch[1]
+          .replace(/^[\s\d.-]+/, '') 
+          .split(" - ")[0]
+          .trim();
+      
+        // 2. Extract Rating: Improved to handle "**Rating**:" or "Rating:"
+        const ratingMatch = block.match(/Rating[:\s*]*([\d.]+)/i);
+        
+        // 3. Extract Price: Handles "Price Level" or just "Price"
+        const priceMatch = block.match(/Price(?:[\s\w]*|)[:\s*]*(\w+)/i);
+        
+        // 4. Extract Address: Improved to stop at the end of the line or "USA"
+        const addressMatch = block.match(/Address[:\s*]*([^|\n\r]+)/i);
+      
+        if (cleanName && ratingMatch) {
+          items.push({
+            name: cleanName,
+            rating: parseFloat(ratingMatch[1]),
+            price: priceMatch ? priceMatch[1] : null,
+            address: addressMatch ? addressMatch[1].replace(/,?\s*USA/gi, "").trim() : null
+          });
+        }
+      });
+
+      if (items.length > 0) {
+        return (
+          <div className="places-container">
+            <h3 className="bold-title">📍 Nearby Recommendations</h3>
+            <div className="places-simple-list">
+              {items.map((item, i) => (
+                <div key={i} className="place-item-simple">
+                  <div className="place-header-row">
+                    <span className="place-name">{item.name}</span>
+                    {item.price && (
+                      <span className="place-price-tag">
+                        {item.price.toLowerCase().includes("moderate") ? "$$" : "$"}
+                      </span>
+                    )}
+                  </div>
+                  <div className="place-details-row">
+                    <StarRating rating={item.rating} />
+                    {item.address && (
+                      <span className="place-address-text">• {item.address}</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+    }
   
-    // --- 3. Default Fallback ---
+    // --- 5. Default Fallback ---
     // If it's neither weather nor a professor, just show the text normally
     return <p className="standard-text">{text}</p>;
   };

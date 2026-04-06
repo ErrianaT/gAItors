@@ -213,6 +213,72 @@
   z-index: 1; 
 }
 
+/* Container for the simplified list */
+.places-simple-list {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.05); /* Slight tint for contrast */
+  border-radius: 8px;
+  padding: 8px;
+  margin: 10px 0;
+}
+
+.place-item-simple {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.place-item-simple:last-child {
+  border-bottom: none;
+}
+
+.place-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.place-name {
+  font-weight: 700;
+  color: #0021A5;
+  flex: 1; 
+}
+
+.place-price-tag {
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #2e7d32;
+  background: #e8f5e9;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.place-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* Better for long names */
+  gap: 10px;
+}
+
+.place-address-text {
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.footer-note-text {
+  font-size: 0.85rem;
+  font-style: italic;
+  color: #777;
+  margin-top: 8px;
+}
+
+/* Adjusting StarRating size for the row */
+.star-wrapper {
+  font-size: 0.85rem;
+}
+
+
 .chat-box {
   width: 100%;
   max-width: 700px;

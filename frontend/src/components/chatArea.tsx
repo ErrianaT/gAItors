@@ -1,10 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./chatArea.css";
+import "leaflet/dist/leaflet.css";
 import botAvatar from "../assets/gator.png";
 import sunnyIcon from "../assets/sunny.png"
 import cloudyIcon from "../assets/cloud.png"
 import rainyIcon from "../assets/rain.png"
 import partlyCloudyIcon from "../assets/partlycloudy.png"
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+// Fix for default marker icons not showing up in Webpack/Vite
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 
 type Message = {
@@ -48,6 +54,67 @@ interface ChatAreaProps {
   onSendMessage: (messages: Message[]) => void;
 }
 
+const DefaultIcon = L.icon({
+    iconUrl: markerIcon,
+    shadowUrl: markerShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
+
+// Helper to move the map view when coordinates change
+const ChangeView: React.FC<{ center: [number, number] }> = ({ center }) => {
+  const map = useMap();
+  map.setView(center, 16);
+  return null;
+};
+
+const LeafletMap: React.FC<{ locationName: string }> = ({ locationName }) => {
+  const [position, setPosition] = useState<[number, number]>([29.6465, -82.3477]); // Default UF Center
+
+  useEffect(() => {
+    const fetchCoords = async () => {
+      try {
+        // add "University of Florida" to the query to ensure we get the right campus spot
+        const query = encodeURIComponent(`${locationName}, University of Florida, Gainesville, FL`);
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`
+        );
+        const data = await response.json();
+
+        if (data && data.length > 0) {
+          const lat = parseFloat(data[0].lat);
+          const lon = parseFloat(data[0].lon);
+          setPosition([lat, lon]);
+        }
+      } catch (error) {
+        console.error("Geocoding error:", error);
+      }
+    };
+
+    if (locationName) fetchCoords();
+  }, [locationName]);
+
+  return (
+    <div className="leaflet-map-wrapper">
+      <MapContainer 
+        center={position} 
+        zoom={16} 
+        scrollWheelZoom={false} 
+        style={{ height: '100%', width: '100%' }}
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; OpenStreetMap'
+        />
+        <Marker position={position}>
+          <Popup>{locationName}</Popup>
+        </Marker>
+        <ChangeView center={position} />
+      </MapContainer>
+    </div>
+  );
+};
 const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -80,7 +147,45 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
   };
 
   const renderMessageContent = (text: string) => {
-    // --- 1. Weather Logic ---
+    // --- 2. Blue Phone / Safety Logic ---
+    if (text.toLowerCase().includes("blue phone")) {
+      const locationMatch = text.match(/at ([\w\s]+), located/i);
+      const locationName = locationMatch ? locationMatch[1] : "Blue Phone Location";
+      const [header, rest] = text.split("**Directions:**");
+      const [directions, footer] = rest ? rest.split("**Total distance:**") : ["", ""];
+
+      return (
+        <div className="safety-card">
+          <h3 className="bold-title">🐊 Gator Safety: Blue Phone</h3>
+          
+          {/* Our new Leaflet Map component */}
+          <LeafletMap locationName={locationName} />
+          
+          <div className="directions-section">
+            <p className="location-highlight">📍 {header.trim()}</p>
+            
+            <details className="directions-dropdown">
+              <summary>View Navigation Steps</summary>
+              <div className="directions-list">
+                {directions.trim()}
+                <div className="travel-stats">
+                  <br/>
+                  <strong>Total Distance:</strong> {footer.split("**Estimated")[0]}
+                  <br/>
+                  <strong>Time:</strong> {footer.split("~")[1]}
+                </div>
+              </div>
+            </details>
+
+            {/* Emergency Call Button */}
+            <a href="tel:3523921111" className="emergency-button">
+              📞 Call UFPD (352-392-1111)
+            </a>
+          </div>
+        </div>
+      );
+    }
+    // --- 2. Weather Logic ---
     if (text.toLowerCase().includes("weather") || text.includes("°F")) {
       // Handles "Midnight/Noon" OR "12:00 PM"
       const forecastRegex = /(Midnight|Noon|\d{1,2}:\d{2}\s[APM]{2}):\s([^,]+),\s(\d+\.\d+°F),.*?(?:humidity\s)?(\d+%)?/gi;
@@ -111,7 +216,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
       }
     }
   
-    // --- 2. Professor Logic ---
+    // --- 3. Professor Logic ---
     const ratingMatch = text.match(/quality rating of (\d\.\d)/);
     const nameMatch = text.match(/Professor ([\w\s]+) has/);
   

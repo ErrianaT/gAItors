@@ -12,7 +12,7 @@ type Message = {
   text: string;
 };
 
-// Helper Component for the Stars
+// Helper for displaying star ratings
 const StarRating: React.FC<{ rating: number }> = ({ rating }) => {
   return (
     <div className="star-wrapper">
@@ -21,16 +21,14 @@ const StarRating: React.FC<{ rating: number }> = ({ rating }) => {
         let fillPercentage = 0;
 
         if (starIndex <= Math.floor(rating)) {
-          fillPercentage = 100; // Full star
+          fillPercentage = 100;
         } else if (starIndex === Math.ceil(rating)) {
-          fillPercentage = (rating % 1) * 100; // Partial star (e.g., 0.7 * 100 = 70%)
+          fillPercentage = (rating % 1) * 100; 
         }
 
         return (
           <span key={i} className="star-container">
-            {/* The background (empty) star */}
             <span className="star-empty">★</span>
-            {/* The foreground (filled) star with dynamic width */}
             <span 
               className="star-filled" 
               style={{ width: `${fillPercentage}%` }}
@@ -81,21 +79,19 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
     }
   };
 
-  // Helper to format the "weird" text into a clean UI
   const renderMessageContent = (text: string) => {
     // --- 1. Weather Logic ---
     if (text.toLowerCase().includes("weather") || text.includes("°F")) {
-      // NEW REGEX: Handles "Midnight/Noon" OR "12:00 PM" and flexible humidity placement
+      // Handles "Midnight/Noon" OR "12:00 PM"
       const forecastRegex = /(Midnight|Noon|\d{1,2}:\d{2}\s[APM]{2}):\s([^,]+),\s(\d+\.\d+°F),.*?(?:humidity\s)?(\d+%)?/gi;
       const matches = [...text.matchAll(forecastRegex)];
     
       if (matches.length > 0) {
         return (
           <div className="weather-forecast">
-            <h3 className="prof-title">Gainesville Forecast</h3>
+            <h3 className="bold-title">Gainesville Forecast</h3>
             <div className="forecast-strip">
               {matches.map((match, i) => {
-                // match[1] = Time, match[2] = Condition, match[3] = Temp
                 const iconSrc = getWeatherIcon(match[2]);
                 return (
                   <div key={i} className="weather-card">
@@ -107,7 +103,6 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
                 );
               })}
             </div>
-            {/* Clean up the text at the bottom to show the summary notes */}
             <p className="weather-note">
               {text.split(/Expect|Please note/i)[1] ? `Note: ${text.split(/Expect|Please note/i)[1]}` : ""}
             </p>
@@ -133,7 +128,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
   
       return (
         <div className="formatted-bot-msg">
-          {profName && <h3 className="prof-title">Professor {profName}</h3>}
+          {profName && <h3 className="bold-title">Professor {profName}</h3>}
           {rating !== null && <StarRating rating={rating} />}
           <p className="prof-description">{cleanedText}</p>
         </div>
@@ -145,14 +140,13 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
     return <p className="standard-text">{text}</p>;
   };
 
-  // Helper for Weather Icons
+  // Helper for displaying weather icons
   const getWeatherIcon = (condition: string) => {
     const cond = condition.toLowerCase();
     
     if (cond.includes("clear") || cond.includes("clearing")) return sunnyIcon;
     if (cond.includes("rain") || cond.includes("drizzle")) return rainyIcon;
     if (cond.includes("broken") || cond.includes("scattered") || cond.includes("clouds")) {
-        // You can get specific: if it's "broken" maybe it's more cloudy
         return cond.includes("broken") ? cloudyIcon : partlyCloudyIcon;
     }
     

@@ -12,7 +12,7 @@ const NavBar: React.FC<NavBarProps> = ({ onMenuClick, onSettingsClick }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showProfileOverlay, setShowProfileOverlay] = useState(false);
   
-  // Load name from localStorage on mount, default to "Gator"
+  // default name is gator
   const [userName, setUserName] = useState(() => {
     return localStorage.getItem("preferredName") || "Gator";
   });

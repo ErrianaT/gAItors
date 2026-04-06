@@ -81,3 +81,76 @@
     background: #0812a4;
     color:#ffffff
   }
+
+  /* User greeting inside the dropdown */
+.dropdown-user-info {
+  padding: 10px;
+  font-weight: bold;
+  border-bottom: 1px solid #eee;
+  color: #0021A5;
+  font-size: 0.9rem;
+}
+
+/* Modal Backdrop */
+.overlay-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000; /* Higher than navbar */
+}
+
+/* The Modal Card */
+.profile-modal {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  width: 320px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  text-align: center;
+}
+
+.profile-modal h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.profile-modal input {
+  width: 100%;
+  padding: 10px;
+  margin: 15px 0;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-sizing: border-box; /* Ensures padding doesn't break width */
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.save-btn {
+  background-color: #FA4616; /* UF Orange */
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background: #eee;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.save-btn:hover { background-color: #d43b12; }
+.cancel-btn:hover { background: #e0e0e0; }

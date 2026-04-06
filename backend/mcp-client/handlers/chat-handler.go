@@ -15,6 +15,7 @@ import (
 
 	// Import agent adapters
 	"uf/mcp/agents/restaurants_agent"
+	"uf/mcp/agents/safety_agent"
 	"uf/mcp/agents/schedule_agent"
 	"uf/mcp/agents/transit_agent"
 	"uf/mcp/agents/weather_agent"
@@ -53,6 +54,12 @@ var AgentRegistry = map[string]llm.Agent{
 		Name: "Restaurants Agent",
 		SelectTool: func(ctx context.Context, model *openai.LLM, query string) (*llm.SelectedToolInfo, error) {
 			return restaurants_agent.SelectRestaurantsTool(ctx, model, query)
+		},
+	},
+	"Safety Agent": {
+		Name: "Safety Agent",
+		SelectTool: func(ctx context.Context, model *openai.LLM, query string) (*llm.SelectedToolInfo, error) {
+			return safety_agent.SelectSafetyTool(ctx, model, query)
 		},
 	},
 	"Chat Agent": {

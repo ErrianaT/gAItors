@@ -14,8 +14,12 @@ import (
 	"uf/mcp/pkg/mcp"
 
 	// Import agent adapters
+	"uf/mcp/agents/rag_agent"
+	"uf/mcp/agents/restaurants_agent"
+	"uf/mcp/agents/safety_agent"
 	"uf/mcp/agents/schedule_agent"
 	"uf/mcp/agents/transit_agent"
+	"uf/mcp/agents/weather_agent"	
 
 	"github.com/ThinkInAIXYZ/go-mcp/protocol"
 	"github.com/tmc/langchaingo/llms/openai"
@@ -28,29 +32,52 @@ type Message struct {
 }
 
 var AgentRegistry = map[string]llm.Agent{
-
-	"Schedule Agent": {
-		Name: "Schedule Agent",
-		SelectTool: func(ctx context.Context, model *openai.LLM, query string) (*llm.SelectedToolInfo, error) {
-			return schedule_agent.SelectScheduleTool(ctx, model, query)
-		},
-	},
-	"Transit Agent": {
-		Name: "Transit Agent",
-		SelectTool: func(ctx context.Context, model *openai.LLM, query string) (*llm.SelectedToolInfo, error) {
-			return transit_agent.SelectTransitTool(ctx, model, query)
-		},
-	},
-	"Chat Agent": {
-		Name: "Chat Agent",
-		SelectTool: func(ctx context.Context, model *openai.LLM, query string) (*llm.SelectedToolInfo, error) {
-			// Chat agent has no tools — return a no-op
-			return &llm.SelectedToolInfo{
-				ToolName: "none",
-				ToolArgs: map[string]any{},
-			}, nil
-		},
-	},
+    "Safety Agent": {
+        Name: "Safety Agent",
+        SelectTool: func(ctx context.Context, model *openai.LLM, query string) (*llm.SelectedToolInfo, error) {
+            return safety_agent.SelectSafetyTool(ctx, model, query)
+        },
+    },
+    "Schedule Agent": {
+        Name: "Schedule Agent",
+        SelectTool: func(ctx context.Context, model *openai.LLM, query string) (*llm.SelectedToolInfo, error) {
+            return schedule_agent.SelectScheduleTool(ctx, model, query)
+        },
+    },
+    "Weather Agent": {
+        Name: "Weather Agent",
+        SelectTool: func(ctx context.Context, model *openai.LLM, query string) (*llm.SelectedToolInfo, error) {
+            return weather_agent.SelectWeatherTool(ctx, model, query)
+        },
+    },
+    "Restaurants Agent": {
+        Name: "Restaurants Agent",
+        SelectTool: func(ctx context.Context, model *openai.LLM, query string) (*llm.SelectedToolInfo, error) {
+            return restaurants_agent.SelectRestaurantsTool(ctx, model, query)
+        },
+    },
+    "Transit Agent": {
+        Name: "Transit Agent",
+        SelectTool: func(ctx context.Context, model *openai.LLM, query string) (*llm.SelectedToolInfo, error) {
+            return transit_agent.SelectTransitTool(ctx, model, query)
+        },
+    },
+    "RAG Agent": {
+        Name: "RAG Agent",
+        SelectTool: func(ctx context.Context, model *openai.LLM, query string) (*llm.SelectedToolInfo, error) {
+            return rag_agent.SelectRAGTool(ctx, model, query)
+        },
+    },
+    "Chat Agent": {
+        Name: "Chat Agent",
+        SelectTool: func(ctx context.Context, model *openai.LLM, query string) (*llm.SelectedToolInfo, error) {
+            // Chat agent has no tools — return a no-op
+            return &llm.SelectedToolInfo{
+                ToolName: "none",
+                ToolArgs: map[string]any{},
+            }, nil
+        },
+    },	
 }
 
 func ChatHandler(w http.ResponseWriter, r *http.Request) {
@@ -117,38 +144,64 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 					toolOutputStr, err := mcp.CallToolWithClient(ctx, mcpClients[clientKey], toolInfo)
 					log.Printf("toolOutputStr: %v", toolOutputStr)
 
-					if err != nil {
-						exception = fmt.Sprintf("CallTool error: %v", err)
-					} else {
-						var result protocol.CallToolResult
-						if err := json.Unmarshal([]byte(toolOutputStr), &result); err != nil {
-							output = toolOutputStr
-						} else {
-							var textParts []string
-							for _, c := range result.Content {
-								if tc, ok := c.(*protocol.TextContent); ok {
-									if tc.Type == "image" {
-										parts := strings.SplitN(tc.Text, "|", 2)
-										if len(parts) == 2 {
-											images = append(images, map[string]string{
-												"mimeType": parts[0],
-												"data":     parts[1],
-											})
-										}
-									} else {
-										textParts = append(textParts, tc.Text)
-									}
-								}
-							}
-							if len(textParts) > 0 {
-								formattedOutput, _ := llm.FormatOutput(ctx, utils.GetModel(), toolInfo.ToolName, strings.Join(textParts, "\n"), userMsg.Content)
-								output = formattedOutput
-							}
-							if output == "" && len(images) > 0 {
-								output = fmt.Sprintf("Here is the live feed for %s camera.", toolInfo.ToolArgs["camera"])
-							}
-						}
-					}
+                    // Try to parse the MCP JSON result (even if err != nil)
+                    var result protocol.CallToolResult
+                    jsonErr := json.Unmarshal([]byte(toolOutputStr), &result)
+
+                    if jsonErr == nil {
+                        // Tool returned valid MCP JSON (success or error)
+                        var textParts []string
+
+                        for _, c := range result.Content {
+                            if tc, ok := c.(*protocol.TextContent); ok {
+
+                                // IMAGE HANDLING (preserved exactly)
+                                if tc.Type == "image" {
+                                    parts := strings.SplitN(tc.Text, "|", 2)
+                                    if len(parts) == 2 {
+                                        images = append(images, map[string]string{
+                                            "mimeType": parts[0],
+                                            "data":     parts[1],
+                                        })
+                                    }
+                                    continue
+                                }
+
+                                // Normal text
+                                textParts = append(textParts, tc.Text)
+                            }
+                        }
+
+                        if result.IsError {
+                            // Surface tool's own error message
+                            exception = strings.Join(textParts, "\n")
+                        } else {
+                            // Normal success
+                            if len(textParts) > 0 {
+                                formattedOutput, _ := llm.FormatOutput(
+                                    ctx,
+                                    utils.GetModel(),
+                                    toolInfo.ToolName,
+                                    strings.Join(textParts, "\n"),
+                                    userMsg.Content,
+                                )
+                                output = formattedOutput
+                            }
+
+                            // If only images exist
+                            if output == "" && len(images) > 0 {
+                                output = fmt.Sprintf("Here is the live feed for %s camera.", toolInfo.ToolArgs["camera"])
+                            }
+                        }
+
+                    } else if err != nil {
+                        // Only fallback if tool failed before producing JSON
+                        exception = fmt.Sprintf("CallTool error: %v", err)
+
+                    } else {
+                        // Unexpected fallback
+                        output = toolOutputStr
+                    }
 				}
 			}
 		}

@@ -19,16 +19,16 @@ import (
 	"uf/mcp/agents/safety_agent"
 	"uf/mcp/agents/schedule_agent"
 	"uf/mcp/agents/transit_agent"
-	"uf/mcp/agents/weather_agent"	
+	"uf/mcp/agents/weather_agent"
 
 	"github.com/ThinkInAIXYZ/go-mcp/protocol"
 	"github.com/tmc/langchaingo/llms/openai"
 )
 
 type Message struct {
-	Role    string      `json:"role"`
-	Content string      `json:"content"`
-	Images  interface{} `json:"images,omitempty"`
+    Role    string      `json:"role"`
+    Content string      `json:"content"`
+    Images  interface{} `json:"images,omitempty"`
 }
 
 var AgentRegistry = map[string]llm.Agent{
@@ -71,160 +71,210 @@ var AgentRegistry = map[string]llm.Agent{
     "Chat Agent": {
         Name: "Chat Agent",
         SelectTool: func(ctx context.Context, model *openai.LLM, query string) (*llm.SelectedToolInfo, error) {
-            // Chat agent has no tools — return a no-op
             return &llm.SelectedToolInfo{
                 ToolName: "none",
                 ToolArgs: map[string]any{},
             }, nil
         },
-    },	
+    },
 }
 
 func ChatHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("[ChatHandler] Processing new user message")
+    log.Printf("[ChatHandler] Processing new user message")
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST")
-	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type")
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+    w.Header().Set("Access-Control-Allow-Methods", "POST")
+    w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type")
 
-	var userMsg Message
-	var output string
-	var exception string
-	var images []map[string]string
+    var userMsg Message
+    var output string
+    var exception string
+    var images []map[string]string
+    var done bool
 
-	if err := json.NewDecoder(r.Body).Decode(&userMsg); err != nil {
-		exception = fmt.Sprintf("Invalid JSON payload: %v", err)
-	} else if userMsg.Role != "user" || userMsg.Content == "" {
-		exception = fmt.Sprintf("Invalid message format: %v", userMsg)
-	}
+    // -------------------------------
+    // USER INPUT VALIDATION
+    // -------------------------------
+    if err := json.NewDecoder(r.Body).Decode(&userMsg); err != nil {
+        exception = fmt.Sprintf("Invalid JSON payload: %v", err)
+        done = true
+    }
+    if !done && (userMsg.Role != "user" || userMsg.Content == "") {
+        exception = fmt.Sprintf("Invalid message format: %v", userMsg)
+        done = true
+    }
 
-	if exception == "" {
-		ctx := r.Context()
+    ctx := r.Context()
 
-		agentName, err := llm.SelectAgent(ctx, utils.GetModel(), userMsg.Content)
-		if err != nil {
-			exception = fmt.Sprintf("Agent selection error: %v", err)
-		} else {
-			log.Printf("[ChatHandler] Agent selected: %s", agentName)
+    // -------------------------------
+    // AGENT SELECTION
+    // -------------------------------
+    var agentName string
+    var agent llm.Agent
+    if !done {
+        var err error
+        agentName, err = llm.SelectAgent(ctx, utils.GetModel(), userMsg.Content)
+        if err != nil {
+            exception = fmt.Sprintf("Agent selection error: %v", err)
+            done = true
+        }
+    }
 
-			agent, ok := AgentRegistry[agentName]
-			if !ok {
-				exception = fmt.Sprintf("Unknown agent selected: %s", agentName)
-			} else {
+    if !done {
+        var ok bool
+        agent, ok = AgentRegistry[agentName]
+        if !ok {
+            exception = fmt.Sprintf("Unknown agent selected: %s", agentName)
+            done = true
+        }
+    }
 
-				// If Chat Agent → return GenericResponse
-				if agentName == "Chat Agent" {
-					resp, _ := llm.GenericResponse(ctx, utils.GetModel(), userMsg.Content)
-					output = resp
-					goto RESPONSE
-				}
+    // Chat Agent → fallback to GenericResponse
+    if !done && agentName == "Chat Agent" {
+        resp, _ := llm.GenericResponse(ctx, utils.GetModel(), userMsg.Content)
+        output = resp
+        done = true
+    }
 
-				toolInfo, err := agent.SelectTool(ctx, utils.GetModel(), userMsg.Content)
-				if err != nil {
-					exception = fmt.Sprintf("Tool selection error: %v", err)
-				} else {
-					log.Printf("[ChatHandler] Tool selected: %s with args %+v", toolInfo.ToolName, toolInfo.ToolArgs)
+    // -------------------------------
+    // TOOL SELECTION
+    // -------------------------------
+    var toolInfo *llm.SelectedToolInfo
+    if !done {
+        var err error
+        toolInfo, err = agent.SelectTool(ctx, utils.GetModel(), userMsg.Content)
+        if err != nil {
+            // FALLBACK (not exception)
+            resp, _ := llm.GenericResponse(ctx, utils.GetModel(), userMsg.Content)
+            output = resp
+            done = true
+        }
+    }
 
-					// If tool is "none" → return GenericResponse
-					if toolInfo.ToolName == "none" {
-						resp, _ := llm.GenericResponse(ctx, utils.GetModel(), userMsg.Content)
-						output = resp
-						goto RESPONSE
-					}
+    // Tool = none → fallback
+    if !done && toolInfo.ToolName == "none" {
+        resp, _ := llm.GenericResponse(ctx, utils.GetModel(), userMsg.Content)
+        output = resp
+        done = true
+    }
 
-					// agent logic
-					mcpClients := common.GetMcpClients()
-					clientKey, ok := common.AgentClientMap[agentName]
-					if !ok {
-						log.Printf("[ChatHandler] Unknown agent: %s, defaulting to UF MCP client", agentName)
-						clientKey = "uf"
-					}
-					log.Printf("[ChatHandler] Routing agent=%s tool=%s to client=%s", agentName, toolInfo.ToolName, clientKey)
+    // -------------------------------
+    // MCP CLIENT ROUTING + TOOL CALL
+    // -------------------------------
+    if !done {
+        mcpClients := common.GetMcpClients()
+        clientKey, ok := common.AgentClientMap[agentName]
+        if !ok {
+            clientKey = "uf"
+        }
 
-					toolOutputStr, err := mcp.CallToolWithClient(ctx, mcpClients[clientKey], toolInfo)
-					log.Printf("toolOutputStr: %v", toolOutputStr)
+        toolOutputStr, err := mcp.CallToolWithClient(ctx, mcpClients[clientKey], toolInfo)
 
-                    // Try to parse the MCP JSON result (even if err != nil)
-                    var result protocol.CallToolResult
-                    jsonErr := json.Unmarshal([]byte(toolOutputStr), &result)
+        // Transport error → fallback
+        if err != nil {
+            resp, _ := llm.GenericResponse(ctx, utils.GetModel(), userMsg.Content)
+            output = resp
+            done = true
+        }
 
-                    if jsonErr == nil {
-                        // Tool returned valid MCP JSON (success or error)
-                        var textParts []string
+        // Parse JSON
+        var result protocol.CallToolResult
+        if !done {
+            jsonErr := json.Unmarshal([]byte(toolOutputStr), &result)
+            if jsonErr != nil {
+                resp, _ := llm.GenericResponse(ctx, utils.GetModel(), userMsg.Content)
+                output = resp
+                done = true
+            }
 
-                        for _, c := range result.Content {
-                            if tc, ok := c.(*protocol.TextContent); ok {
+            // MCP error → fallback
+            if !done && result.IsError {
+                resp, _ := llm.GenericResponse(ctx, utils.GetModel(), userMsg.Content)
+                output = resp
+                done = true
+            }
 
-                                // IMAGE HANDLING (preserved exactly)
-                                if tc.Type == "image" {
-                                    parts := strings.SplitN(tc.Text, "|", 2)
-                                    if len(parts) == 2 {
-                                        images = append(images, map[string]string{
-                                            "mimeType": parts[0],
-                                            "data":     parts[1],
-                                        })
-                                    }
-                                    continue
-                                }
+            // -------------------------------
+            // EXTRACT CONTENT
+            // -------------------------------
+            var textParts []string
+            if !done {
+                for _, c := range result.Content {
+                    switch content := c.(type) {
 
-                                // Normal text
-                                textParts = append(textParts, tc.Text)
+                    case *protocol.TextContent:
+                        if content.Type == "image" {
+                            parts := strings.SplitN(content.Text, "|", 2)
+                            if len(parts) == 2 {
+                                images = append(images, map[string]string{
+                                    "mimeType": parts[0],
+                                    "data":     parts[1],
+                                })
                             }
+                            continue
                         }
+                        textParts = append(textParts, content.Text)
 
-                        if result.IsError {
-                            // Surface tool's own error message
-                            exception = strings.Join(textParts, "\n")
-                        } else {
-                            // Normal success
-                            if len(textParts) > 0 {
-                                formattedOutput, _ := llm.FormatOutput(
-                                    ctx,
-                                    utils.GetModel(),
-                                    toolInfo.ToolName,
-                                    strings.Join(textParts, "\n"),
-                                    userMsg.Content,
-                                )
-                                output = formattedOutput
-                            }
-
-                            // If only images exist
-                            if output == "" && len(images) > 0 {
-                                output = fmt.Sprintf("Here is the live feed for %s camera.", toolInfo.ToolArgs["camera"])
-                            }
+                    default:
+                        raw, _ := json.Marshal(content)
+                        var maybe struct {
+                            Text string `json:"text"`
                         }
-
-                    } else if err != nil {
-                        // Only fallback if tool failed before producing JSON
-                        exception = fmt.Sprintf("CallTool error: %v", err)
-
-                    } else {
-                        // Unexpected fallback
-                        output = toolOutputStr
+                        if json.Unmarshal(raw, &maybe) == nil && maybe.Text != "" {
+                            textParts = append(textParts, maybe.Text)
+                        }
                     }
-				}
-			}
-		}
-	}
+                }
 
-RESPONSE:
+                // Semantic error detection
+                joined := strings.ToLower(strings.Join(textParts, "\n"))
+                if strings.Contains(joined, "error:") ||
+                    strings.Contains(joined, "unable to") ||
+                    strings.Contains(joined, "failed") ||
+                    strings.Contains(joined, "exception") {
 
-	content := output
-	if exception != "" {
-		log.Printf("[ChatHandler] Exception occurred: %s", exception)
-		content = exception
-	}
+                    resp, _ := llm.GenericResponse(ctx, utils.GetModel(), userMsg.Content)
+                    output = resp
+                    done = true
+                }
 
-	assistantMsg := Message{
-		Role:    "assistant",
-		Content: content,
-	}
-	if len(images) > 0 {
-		assistantMsg.Images = images
-	}
+                // Successful tool output
+                if !done && len(textParts) > 0 {
+                    formattedOutput, _ := llm.FormatOutput(
+                        ctx,
+                        utils.GetModel(),
+                        toolInfo.ToolName,
+                        strings.Join(textParts, "\n"),
+                        userMsg.Content,
+                    )
+                    output = formattedOutput
+                    done = true
+                }
 
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(assistantMsg); err != nil {
-		http.Error(w, fmt.Sprintf("Failed to encode response: %v", err), http.StatusInternalServerError)
-	}
+                if !done && output == "" && len(images) > 0 {
+                    output = fmt.Sprintf("Here is the live feed for %s camera.", toolInfo.ToolArgs["camera"])
+                    done = true
+                }
+            }
+        }
+    }
+
+    // -------------------------------
+    // FINAL RESPONSE BLOCK
+    // -------------------------------
+    content := output
+    if exception != "" {
+        content = exception
+    }
+
+    assistantMsg := Message{
+        Role:    "assistant",
+        Content: content,
+    }
+    if len(images) > 0 {
+        assistantMsg.Images = images
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(assistantMsg)
 }

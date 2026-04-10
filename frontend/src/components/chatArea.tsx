@@ -294,7 +294,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
         </div>
       );
     }
-    // --- 4. Weather Logic ---
+    // --- 3. Weather Logic ---
     if (text.includes("°F") || text.toLowerCase().includes("forecast")) {
       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
       
@@ -347,7 +347,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
       );
     }
 
-    // --- 5. RTS Bus Tool Formatting ---
+    // --- 4. RTS Bus Tool Formatting ---
     if (text.includes("Route") || text.includes("Leg")) {
       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
       
@@ -433,7 +433,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
       "swrc_basket56": "http://recsports.ufl.edu/cam/cam6.jpg",
     };
 
-    // --- 6. Gym Camera Tool Formatting ---
+    // --- 5. Gym Camera Tool Formatting ---
     if (text.toLowerCase().includes("gym") || text.toLowerCase().includes("camera")) {
       let imageSrc = null;
       let detectedLocation = "Gym Feed";
@@ -488,6 +488,64 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
               <p>Unable to load live image. Please check RecSports status.</p>
             </div>
           )}
+        </div>
+      );
+    }
+
+    // --- 7. Blue Phone / Emergency Tool ---
+    // --- 7. Blue Phone / Emergency Tool (Adaptive Version) ---
+    if (text.toLowerCase().includes("blue safety phone") || text.toLowerCase().includes("blue emergency phone") || text.includes("blue phone")) {
+      
+      // 1. Capture Location: Handles "Reitz Union North" OR NW Holland Law (Building 757)
+      const locationMatch = text.match(/at\s+["']?([^"']+)["']?,\s+approximately/i) || 
+                            text.match(/at the (.*?) \(Building (\d+)\)/i);
+      
+      const buildingDisplay = locationMatch ? locationMatch[1] : "Campus Location";
+      
+      // 2. Capture Distance/Time
+      const distanceMatch = text.match(/approximately (.*?) away/i) || text.match(/around (.*?) and/i);
+      const distance = distanceMatch ? distanceMatch[1] : "Nearby";
+
+      // 3. Capture Directions (Look for numbered lines)
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      const directions = lines.filter(l => /^\d+\./.test(l));
+
+      return (
+        <div className="emergency-card">
+          <div className="emergency-header">
+            <span className="emergency-icon">🚨</span>
+            <h3 className="emergency-title">Blue Phone Locator</h3>
+          </div>
+          
+          <div className="emergency-body">
+            <div className="loc-main">
+              <span className="loc-label">Target Location</span>
+              <div className="loc-value-row">
+                <span className="loc-value">{buildingDisplay}</span>
+                <span className="dist-tag">{distance}</span>
+              </div>
+            </div>
+
+            {directions.length > 0 && (
+              <div className="directions-box">
+                <span className="loc-label">Walking Directions</span>
+                <div className="steps-list">
+                  {directions.map((step, i) => (
+                    <div key={i} className="step-item">
+                      <span className="step-num">{i + 1}</span>
+                      <span className="step-text">{step.replace(/^\d+\.\s*/, '')}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="emergency-footer">
+            <p className="emergency-warning">
+              <strong>Safety First:</strong> If you are in immediate danger, dial <strong>911</strong> or <strong>352-392-1111</strong>.
+            </p>
+          </div>
         </div>
       );
     }

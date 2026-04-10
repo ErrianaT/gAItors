@@ -115,6 +115,44 @@ const LeafletMap: React.FC<{ locationName: string }> = ({ locationName }) => {
     </div>
   );
 };
+
+// helper to extract data 
+const parseBotString = (text: string) => {
+  const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
+  const data: Record<string, string> = {};
+
+  lines.forEach(line => {
+    const colonIndex = line.indexOf(':');
+    if (colonIndex !== -1) {
+      // removeing dashes, stars, dots
+      const key = line.slice(0, colonIndex)
+        .replace(/^[^a-zA-Z0-9]+/, '') 
+        .replace(/[*#-]/g, '')
+        .trim()
+        .toLowerCase();
+        
+      const value = line.slice(colonIndex + 1).replace(/\*/g, '').trim();
+      data[key] = value;
+    }
+  });
+
+  if (data['location'] && !data['address']) data['address'] = data['location'];
+  
+  return data;
+};
+
+const formatBoldText = (text: string) => {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+
+  return parts.map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      // wrap in <strong></strong> to bold text
+      return <strong key={index}>{part.replace(/\*\*/g, "")}</strong>;
+    }
+    return part;
+  });
+};
+
 const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -147,167 +185,160 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
   };
 
   const renderMessageContent = (text: string) => {
-    // --- 1. Blue Phone / Safety Logic ---
-    if (text.toLowerCase().includes("blue phone")) {
-      const locationMatch = text.match(/at ([\w\s]+), located/i);
-      const locationName = locationMatch ? locationMatch[1] : "Blue Phone Location";
-      const [header, rest] = text.split("**Directions:**");
-      const [directions, footer] = rest ? rest.split("**Total distance:**") : ["", ""];
-
-      return (
-        <div className="safety-card">
-          <h3 className="bold-title">🐊 Gator Safety: Blue Phone</h3>
-          
-          {/* Our new Leaflet Map component */}
-          <LeafletMap locationName={locationName} />
-          
-          <div className="directions-section">
-            <p className="location-highlight">📍 {header.trim()}</p>
-            
-            <details className="directions-dropdown">
-              <summary>View Navigation Steps</summary>
-              <div className="directions-list">
-                {directions.trim()}
-                <div className="travel-stats">
-                  <br/>
-                  <strong>Total Distance:</strong> {footer.split("**Estimated")[0]}
-                  <br/>
-                  <strong>Time:</strong> {footer.split("~")[1]}
-                </div>
-              </div>
-            </details>
-
-            {/* Emergency Call Button */}
-            <a href="tel:3523921111" className="emergency-button">
-              📞 Call UFPD (352-392-1111)
-            </a>
-          </div>
-        </div>
-      );
-    }
-    // --- 2. Weather Logic ---
-    if (text.toLowerCase().includes("weather") || text.includes("°F")) {
-      // Handles "Midnight/Noon" OR "12:00 PM"
-      const forecastRegex = /(Midnight|Noon|\d{1,2}:\d{2}\s[APM]{2}):\s([^,]+),\s(\d+\.\d+°F),.*?(?:humidity\s)?(\d+%)?/gi;
-      const matches = [...text.matchAll(forecastRegex)];
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  
+    // --- 1. Professor Tool Formatting ---
+    if (text.toLowerCase().includes("quality rating")) {
+      const data = parseBotString(text);
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      
+      // removing everything except numbers and decimals for the rating
+      const rawRating = data['quality rating'] || data['rating'] || "0";
+      const rating = parseFloat(rawRating.replace(/[^0-9.]/g, '')) || 0;
+      
+      const name = (data['professor'] || "Instructor").replace(/\*/g, '');
     
-      if (matches.length > 0) {
-        return (
-          <div className="weather-forecast">
-            <h3 className="bold-title">Gainesville Forecast</h3>
-            <div className="forecast-strip">
-              {matches.map((match, i) => {
-                const iconSrc = getWeatherIcon(match[2]);
-                return (
-                  <div key={i} className="weather-card">
-                    <span className="weather-time">{match[1]}</span>
-                    <img src={iconSrc} alt={match[2]} className="weather-icon-png" />
-                    <span className="weather-temp">{match[3]}</span>
-                    <span className="weather-desc">{match[2]}</span>
-                  </div>
-                );
-              })}
-            </div>
-            <p className="weather-note">
-              {text.split(/Expect|Please note/i)[1] ? `Note: ${text.split(/Expect|Please note/i)[1]}` : ""}
+      // collecting lines that don't have the following
+      const paragraphs = lines.filter(l => 
+        !l.includes(':') && 
+        !l.includes('**') && 
+        !l.startsWith('#')
+      );
+    
+      return (
+        <div className="formatted-bot-msg prof-card">
+          <h3 className="bold-title">Professor {name}</h3>
+          <StarRating rating={rating} />
+          
+          <div className="prof-stats-grid">
+            {data['would take again'] && (
+              <div className="stat-pill">
+                <span className="stat-label">Retake:</span>
+                <span className="stat-value">{data['would take again']}</span>
+              </div>
+            )}
+            {data['level of difficulty'] && (
+              <div className="stat-pill">
+                <span className="stat-label">Difficulty:</span>
+                <span className="stat-value">{data['level of difficulty']}</span>
+              </div>
+            )}
+          </div>
+    
+          <div className="prof-content">
+            <p className="prof-description">
+              {paragraphs.join(' ').replace(/^[0-9.\s-]+/, '')}
             </p>
           </div>
-        );
-      }
-    }
-  
-    // --- 3. Professor Logic ---
-    const ratingMatch = text.match(/quality rating of (\d\.\d)/);
-    const nameMatch = text.match(/Professor ([\w\s]+) has/);
-  
-    if (ratingMatch || nameMatch) {
-      const rating = ratingMatch ? parseFloat(ratingMatch[1]) : null;
-      const profName = nameMatch ? nameMatch[1] : null;
-  
-      const cleanedText = text
-        .replace(/Professor [\w\s]+ has a quality rating of \d\.\d out of 5\./, "")
-        .replace(/Student feedback highlights:/g, "")
-        .replace(/- /g, " ")
-        .replace(/\n/g, " ")
-        .trim();
-  
-      return (
-        <div className="formatted-bot-msg">
-          {profName && <h3 className="bold-title">Professor {profName}</h3>}
-          {rating !== null && <StarRating rating={rating} />}
-          <p className="prof-description">{cleanedText}</p>
         </div>
       );
     }
-
-    // --- 4. Restaurants Logic ---
-    if (text.includes("Rating:") || text.includes("Address:")) {
-      // Split the text into blocks based on where a bolded name "**Name**" appears
-      const blocks = text.split(/\n(?=\d+\.|\s*-?\s*\*\*)/g);
-      const items: any[] = [];
-
-      blocks.forEach(block => {
-        // 1. Extract Name: Find the FIRST bolded string, then strip leading dashes/numbers
-        const nameMatch = block.match(/\*\*(.*?)\*\*/);
-        if (!nameMatch) return;
-        
-        // Clean name: removes leading "- ", "1. ", and trailing " - Indian Restaurant"
-        let cleanName = nameMatch[1]
-          .replace(/^[\s\d.-]+/, '') 
-          .split(" - ")[0]
-          .trim();
-      
-        // 2. Extract Rating: Improved to handle "**Rating**:" or "Rating:"
-        const ratingMatch = block.match(/Rating[:\s*]*([\d.]+)/i);
-        
-        // 3. Extract Price: Handles "Price Level" or just "Price"
-        const priceMatch = block.match(/Price(?:[\s\w]*|)[:\s*]*(\w+)/i);
-        
-        // 4. Extract Address: Improved to stop at the end of the line or "USA"
-        const addressMatch = block.match(/Address[:\s*]*([^|\n\r]+)/i);
-      
-        if (cleanName && ratingMatch) {
-          items.push({
-            name: cleanName,
-            rating: parseFloat(ratingMatch[1]),
-            price: priceMatch ? priceMatch[1] : null,
-            address: addressMatch ? addressMatch[1].replace(/,?\s*USA/gi, "").trim() : null
-          });
-        }
-      });
-
-      if (items.length > 0) {
-        return (
-          <div className="places-container">
-            <h3 className="bold-title">📍 Nearby Recommendations</h3>
-            <div className="places-simple-list">
-              {items.map((item, i) => (
+  
+    // --- 2. Restaurants Tool Formatting ---
+    if (text.includes("Address:") || text.includes("Rating:") || text.includes("Location:")) {
+      const segments = text.split(/\n(?=\d+\.)/);
+      const blocks = segments.slice(1);
+    
+      return (
+        <div className="places-container">
+          <h3 className="bold-title">📍 Nearby Recommendations</h3>
+          <div className="places-simple-list">
+            {blocks.map((block, i) => {
+              const info = parseBotString(block);
+              
+              // removes numbers, dots, and asterices 
+              const name = block.split('\n')[0]
+                .replace(/^[0-9.\s-]+/, '') 
+                .replace(/\*/g, '')         
+                .trim();
+              
+              return (
                 <div key={i} className="place-item-simple">
                   <div className="place-header-row">
-                    <span className="place-name">{item.name}</span>
-                    {item.price && (
-                      <span className="place-price-tag">
-                        {item.price.toLowerCase().includes("moderate") ? "$$" : "$"}
-                      </span>
-                    )}
+                    <span className="place-name">{name}</span>
+                    <span className="place-price-tag">
+                      {info['price']?.toLowerCase().includes("inexpensive") ? "$" : "$$"}
+                    </span>
                   </div>
                   <div className="place-details-row">
-                    <StarRating rating={item.rating} />
-                    {item.address && (
-                      <span className="place-address-text">• {item.address}</span>
+                    <StarRating rating={parseFloat(info['rating'] || "0")} />
+                    {/* matches address or location */}
+                    {info['address'] && (
+                      <span className="place-address-text">• {info['address']}</span>
                     )}
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
-        );
-      }
+        </div>
+      );
+    }
+    // --- 4. Weather Logic ---
+    if (text.includes("°F") || text.toLowerCase().includes("forecast")) {
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      
+      // Isolate the forecast lines
+      const forecastLines = lines.filter(line => line.startsWith('- **'));
+      const introText = lines[0]; 
+      const footerText = lines[lines.length - 1].startsWith('-') ? "" : lines[lines.length - 1];
+    
+      const weatherData = forecastLines.map(line => {
+        const timeMatch = line.match(/\*\*(.*?)\*\*/);
+        const time = timeMatch ? timeMatch[1].trim() : "";
+        const details = line.split('**:')[1] || "";
+        
+        const parts = details.split(',').map(p => p.trim());
+        const condition = parts[0] || "Clear";
+        const temp = parts[1] || "N/A";
+        
+        // Clean humidity text for the card
+        let humidity = parts[2] || "";
+        if (humidity) {
+            humidity = humidity.replace(/[a-zA-Z\s]+/g, '').trim(); 
+        }
+        
+        return { time, condition, temp, humidity };
+      });
+    
+      return (
+        <div className="weather-forecast">
+          <h3 className="bold-title">Gainesville Forecast</h3>
+          <p className="weather-intro">{introText}</p>
+          
+          <div className="forecast-strip">
+            {weatherData.map((slot, i) => (
+              <div key={i} className="weather-card">
+                <span className="weather-time">{slot.time}</span>
+                <img 
+                  src={getWeatherIcon(slot.condition)} 
+                  alt={slot.condition} 
+                  className="weather-icon-png" 
+                />
+                <span className="weather-temp">{slot.temp}</span>
+                <span className="weather-desc">{slot.condition}</span>
+                {slot.humidity && (
+                  <span className="weather-humidity">💧 {slot.humidity}</span>
+                )}
+              </div>
+            ))}
+          </div>
+          
+          {footerText && <p className="weather-note">{footerText}</p>}
+        </div>
+      );
     }
   
-    // --- 5. Default Fallback ---
-    // If it's neither weather nor a professor, just show the text normally
-    return <p className="standard-text">{text}</p>;
+    // --- #. Fallback & Default Formatting---
+    return (
+      <div className="standard-text">
+        {lines.map((line, i) => (
+          <p key={i} style={{ marginBottom: '10px', lineHeight: '1.5' }}>
+            {formatBoldText(line)}
+          </p>
+        ))}
+      </div>
+    );
   };
 
   // Helper for displaying weather icons

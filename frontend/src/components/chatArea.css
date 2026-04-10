@@ -148,6 +148,40 @@
   line-height: 1.5;
 }
 
+.prof-card {
+  background: #ffffff;
+  border-left: 4px solid #fa4616; /* UF Orange */
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.prof-stats-grid {
+  display: flex;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.stat-pill {
+  background: #f0f4f7;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  display: flex;
+  gap: 5px;
+}
+
+.stat-label {
+  font-weight: bold;
+  color: #0021a5; /* UF Blue */
+}
+
+.prof-description {
+  line-height: 1.5;
+  color: #444;
+  font-size: 0.95rem;
+}
+
 .forecast-strip {
   display: flex;
   overflow-x: auto;
@@ -156,12 +190,48 @@
   scrollbar-width: none; /* Hide scrollbar for clean look */
 }
 
+.weather-forecast {
+  background: linear-gradient(135deg, #0021A5 0%, #0052cc 100%);
+  color: white;
+  padding: 15px;
+  border-radius: 15px;
+  margin: 10px 0;
+}
+
+.weather-forecast .bold-title {
+  color: white;
+  margin-bottom: 5px;
+}
+
+.weather-intro {
+  font-size: 0.85rem;
+  margin-bottom: 15px;
+  opacity: 0.9;
+}
+
+.forecast-strip {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  /* Custom scrollbar for a cleaner look */
+}
+
+.forecast-strip::-webkit-scrollbar {
+  height: 4px;
+}
+
+.forecast-strip::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+}
+
 .weather-card {
-  min-width: 90px;
-  background: #f8f9fa;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(5px);
   padding: 10px;
+  border-radius: 10px;
+  min-width: 100px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -169,37 +239,37 @@
 }
 
 .weather-time {
-  font-size: 0.75rem;
   font-weight: bold;
-  color: #666;
+  font-size: 0.8rem;
+  text-transform: uppercase;
 }
 
 .weather-icon-png {
-  width: 40px;  /* Adjust based on your icon size */
+  width: 40px;
   height: 40px;
-  object-fit: contain;
-  margin: 8px 0;
-  /* Optional: Filter if you want to change icon colors dynamically */
-  /* filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.1)); */
+  margin: 5px 0;
 }
 
 .weather-temp {
+  font-size: 1.1rem;
   font-weight: bold;
-  color: #fa4616; /* Gator Orange */
-  font-size: 1rem;
 }
 
 .weather-desc {
   font-size: 0.7rem;
-  color: #555;
-  white-space: nowrap;
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+.weather-humidity {
+  font-size: 0.65rem;
+  margin-top: 5px;
 }
 
 .weather-note {
-  font-size: 0.8rem;
-  color: #888;
-  font-style: italic;
   margin-top: 10px;
+  font-style: italic;
+  font-size: 0.85rem;
 }
 
 .leaflet-map-wrapper {

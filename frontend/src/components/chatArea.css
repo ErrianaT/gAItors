@@ -395,6 +395,53 @@
   flex-direction: column;
 }
 
+.gym-cam-container {
+  background: #fdfdfd;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 15px;
+}
+
+.cam-frame {
+  position: relative;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #000;
+  margin: 10px 0;
+  border: 2px solid #0021a5;
+}
+
+.gym-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.live-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(255, 0, 0, 0.8);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.7rem;
+  z-index: 2;
+}
+
+.cam-timestamp {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  padding: 4px 8px;
+  font-size: 0.65rem;
+  font-family: monospace;
+}
+
 .places-simple-list {
   display: flex;
   flex-direction: column;

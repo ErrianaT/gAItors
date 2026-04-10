@@ -513,3 +513,5 @@
 2026/04/09 20:37:52 Calling nearby_stops for lat=29.644929 lon=-82.340175 radius=100m (RTSFL only)
 2026/04/09 20:37:52 HTTP GET /v3/public/nearby_stops?lat=29.644929&lon=-82.340175&radius=100
 2026/04/09 20:37:52 HTTP GET /v3/public/nearby_stops returned status 429
+2026/04/09 21:02:10 Loaded 952 GTFS stops from ../data/stops.txt
+2026/04/09 21:02:10 Indexed 91516 stop_times from ../data/stop_times.txt into 3409 trips

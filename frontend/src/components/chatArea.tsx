@@ -278,7 +278,6 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
     if (text.includes("°F") || text.toLowerCase().includes("forecast")) {
       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
       
-      // Isolate the forecast lines
       const forecastLines = lines.filter(line => line.startsWith('- **'));
       const introText = lines[0]; 
       const footerText = lines[lines.length - 1].startsWith('-') ? "" : lines[lines.length - 1];
@@ -292,7 +291,6 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
         const condition = parts[0] || "Clear";
         const temp = parts[1] || "N/A";
         
-        // Clean humidity text for the card
         let humidity = parts[2] || "";
         if (humidity) {
             humidity = humidity.replace(/[a-zA-Z\s]+/g, '').trim(); 
@@ -329,11 +327,11 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
       );
     }
 
-    // --- 5. Transit / Bus Tool (Arrival & Departure Fix) ---
+    // --- 5. RTS Bus Tool Formatting ---
     if (text.includes("Route") || text.includes("Leg")) {
       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
       
-      // Helper to extract all times from a string (e.g., "8:55 PM" and "9:21 PM")
+      // extracting bus times 
       const extractTimes = (str: string) => {
         const timeRegex = /(\d{1,2}:\d{2}\s?[APM]{2})/gi;
         return str.match(timeRegex) || [];
@@ -352,7 +350,6 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
 
       const legs = lines.filter(l => l.toLowerCase().includes('leg')).map(line => {
         const times = extractTimes(line);
-        // Remove formatting to clean the text
         const cleanLine = line.replace(/^[-*]\s*/, '').replace(/\*\*/g, '');
         
         return {
@@ -399,6 +396,78 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
           )}
           
           <p className="footer-note-text">{lines[lines.length - 1]}</p>
+        </div>
+      );
+    }
+
+    type GymId = "swrc_weight1" | "swrc_weight2" | "srfc_weight";
+
+    const GYM_URLS: Record<string, string> = {
+      "srfc_weight":   "http://recsports.ufl.edu/cam/cam8.jpg",
+      "srfc_cardio":   "http://recsports.ufl.edu/cam/cam7.jpg",
+      "swrc_weight1":  "http://recsports.ufl.edu/cam/cam1.jpg",
+      "swrc_weight2":  "http://recsports.ufl.edu/cam/cam4.jpg",
+      "swrc_cardio":   "http://recsports.ufl.edu/cam/cam5.jpg",
+      "swrc_basket12": "http://recsports.ufl.edu/cam/cam3.jpg",
+      "swrc_basket34": "http://recsports.ufl.edu/cam/cam2.jpg",
+      "swrc_basket56": "http://recsports.ufl.edu/cam/cam6.jpg",
+    };
+
+    // --- 6. Gym Camera Tool Formatting ---
+    if (text.toLowerCase().includes("gym") || text.toLowerCase().includes("camera")) {
+      let imageSrc = null;
+      let detectedLocation = "Gym Feed";
+
+      // 1. Checking for Base64 (from backend)
+      const base64Match = text.match(/(image\/(?:jpeg|png)\|[A-Za-z0-9+/=]+)/);
+      
+      if (base64Match) {
+        const [mime, data] = base64Match[0].split('|');
+        imageSrc = `data:${mime};base64,${data}`;
+      } else {
+        // 2. Fallback: Identifying which camera the LLM is talking about by checking against the keys in GYM_URLS
+        // We check against the keys in GYM_URLS
+        const keys = Object.keys(GYM_URLS);
+        const foundKey = keys.find(key => 
+          text.toLowerCase().includes(key.replace('_', ' ')) || 
+          text.toLowerCase().includes(key.split('_')[1]) // e.g., "weight1"
+        );
+
+        if (foundKey) {
+          imageSrc = GYM_URLS[foundKey];
+          detectedLocation = foundKey.replace('_', ' ').toUpperCase();
+        }
+      }
+
+      return (
+        <div className="gym-cam-container">
+          <div className="place-header-row">
+            <h3 className="bold-title">🏋️ {detectedLocation}</h3>
+            <span className="place-price-tag">LIVE</span>
+          </div>
+          
+          <p className="footer-note-text" style={{ margin: '8px 0' }}>
+            {text.split('!')[0]}!
+          </p>
+          
+          {imageSrc ? (
+            <div className="cam-frame">
+              <div className="live-badge">● LIVE STREAM</div>
+              <img 
+                src={imageSrc} 
+                alt="Gym Camera" 
+                className="gym-image" 
+                loading="lazy"
+              />
+              <div className="cam-timestamp">
+                {new Date().toLocaleTimeString()}
+              </div>
+            </div>
+          ) : (
+            <div className="cam-placeholder">
+              <p>Unable to load live image. Please check RecSports status.</p>
+            </div>
+          )}
         </div>
       );
     }

@@ -6,6 +6,7 @@ import menuIcon from "../assets/menuIcon.png";
 interface NavBarProps {
   onMenuClick: () => void;
   onSettingsClick: () => void;
+  isSidePanelOpen: boolean;
 }
 
 const NavBar: React.FC<NavBarProps> = ({ onMenuClick, onSettingsClick }) => {

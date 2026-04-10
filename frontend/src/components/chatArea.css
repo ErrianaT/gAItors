@@ -283,11 +283,122 @@
   z-index: 1; 
 }
 
-/* Container for the simplified list */
+.transit-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bus-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bus-card {
+  display: flex;
+  align-items: center;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 10px 15px;
+  gap: 15px;
+}
+
+.bus-number {
+  background: #0021a5; /* UF Blue */
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.bus-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.bus-time {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.bus-status {
+  font-size: 0.75rem;
+  color: #2e7d32; /* Green for "Direct" */
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* Transfer Styling */
+.transfer-card {
+  background: #fff;
+  border: 1px dashed #0021a5;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.transfer-header {
+  font-weight: bold;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+  color: #555;
+}
+
+.timeline {
+  border-left: 2px solid #ddd;
+  margin-left: 10px;
+  padding-left: 15px;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 15px;
+  font-size: 0.85rem;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -22px;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  background: #fa4616; /* Gator Orange */
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.leg-times {
+  display: flex;
+  gap: 15px;
+  margin-top: 5px;
+  font-size: 0.8rem;
+  color: #fa4616; /* UF Orange */
+  background: #fff3e0;
+  padding: 2px 8px;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+.leg-description {
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.timeline-content {
+  display: flex;
+  flex-direction: column;
+}
+
 .places-simple-list {
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.05); /* Slight tint for contrast */
+  background: rgba(255, 255, 255, 0.05); 
   border-radius: 8px;
   padding: 8px;
   margin: 10px 0;

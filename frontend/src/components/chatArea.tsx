@@ -328,6 +328,80 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
         </div>
       );
     }
+
+    // --- 5. Transit / Bus Tool (Arrival & Departure Fix) ---
+    if (text.includes("Route") || text.includes("Leg")) {
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      
+      // Helper to extract all times from a string (e.g., "8:55 PM" and "9:21 PM")
+      const extractTimes = (str: string) => {
+        const timeRegex = /(\d{1,2}:\d{2}\s?[APM]{2})/gi;
+        return str.match(timeRegex) || [];
+      };
+
+      const directRoutes = lines.filter(l => 
+        l.startsWith('- **Route') && !l.toLowerCase().includes('via')
+      ).map(line => {
+        const route = line.match(/\*\*Route (.*?)\*\*/)?.[1] || "";
+        const times = extractTimes(line);
+        return { 
+          route, 
+          departs: times[0] || "N/A" 
+        };
+      });
+
+      const legs = lines.filter(l => l.toLowerCase().includes('leg')).map(line => {
+        const times = extractTimes(line);
+        // Remove formatting to clean the text
+        const cleanLine = line.replace(/^[-*]\s*/, '').replace(/\*\*/g, '');
+        
+        return {
+          text: cleanLine,
+          departs: times[0],
+          arrives: times[1]
+        };
+      });
+
+      return (
+        <div className="transit-container">
+          <h3 className="bold-title">🚌 Bus Schedule</h3>
+          
+          {directRoutes.map((bus, i) => (
+            <div key={i} className="bus-card">
+              <div className="bus-number">#{bus.route}</div>
+              <div className="bus-info">
+                <span className="bus-time">Departs: {bus.departs}</span>
+                <span className="bus-status">Direct Trip</span>
+              </div>
+            </div>
+          ))}
+
+          {legs.length > 0 && (
+            <div className="transfer-card">
+              <div className="transfer-header">Transfer Details</div>
+              <div className="timeline">
+                {legs.map((leg, i) => (
+                  <div key={i} className="timeline-item">
+                    <div className="timeline-dot"></div>
+                    <div className="timeline-content">
+                      <div className="leg-description">{leg.text}</div>
+                      {(leg.departs || leg.arrives) && (
+                        <div className="leg-times">
+                          {leg.departs && <span><b>Departs:</b> {leg.departs}</span>}
+                          {leg.arrives && <span><b>Arrives:</b> {leg.arrives}</span>}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          <p className="footer-note-text">{lines[lines.length - 1]}</p>
+        </div>
+      );
+    }
   
     // --- #. Fallback & Default Formatting---
     return (

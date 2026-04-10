@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./chatArea.css";
 import "leaflet/dist/leaflet.css";
 import botAvatar from "../assets/gator.png";
+import uploadIcon from "../assets/upload.png"
 import sunnyIcon from "../assets/sunny.png"
 import cloudyIcon from "../assets/cloud.png"
 import rainyIcon from "../assets/rain.png"
@@ -148,42 +149,81 @@ const formatBoldText = (text: string) => {
   });
 };
 
+
 const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSend = async () => {
-    if (!message.trim() || isLoading) return;
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+  
+    const reader = new FileReader();
+  
+    reader.onload = async (e) => {
+      const rawText = e.target?.result as string;
+  
+      const backendMessage = `I uploaded a document named "${file.name}".
+  
+  Here is its content:
+  
+  ${rawText}
+  
+  Please summarize this document.`;
+  
+      const displayMessage = `📎 Uploaded ${file.name}`;
+  
+      await handleSend(backendMessage, displayMessage);
+    };
+  
+    reader.readAsText(file);
+    event.target.value = "";
+  };
 
-    const userMessage: Message = { sender: "user", text: message };
-    const initialMessages = [...messages, userMessage];
-    
-    onSendMessage(initialMessages);
-    const currentMessage = message; 
-    
-    setMessage("");
+  const handleSend = async (
+    customMessage?: string,
+    displayOverride?: string
+  ) => {
+    const textToSend = customMessage ?? message;
+  
+    if (!textToSend.trim() || isLoading) return;
+  
+    const userMessage: Message = {
+      sender: "user",
+      text: displayOverride ?? textToSend
+    };
+  
+    const updatedMessages = [...messages, userMessage];
+    onSendMessage(updatedMessages);
+  
+    if (!customMessage) setMessage("");
     setIsLoading(true);
-
+  
     try {
       const response = await fetch("http://localhost:8080/chat", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-          role: "user", 
-          content: currentMessage 
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          role: "user",
+          content: textToSend
         }),
       });
-
+  
       const data = await response.json();
+  
       const botMessage: Message = {
         sender: "bot",
         text: data.content || "I've processed your request.",
       };
-      onSendMessage([...initialMessages, botMessage]);
+  
+      onSendMessage([...updatedMessages, botMessage]);
     } catch (error) {
-      onSendMessage([...initialMessages, { sender: "bot", text: "Backend Error!" }]);
+      onSendMessage([
+        ...updatedMessages,
+        { sender: "bot", text: "Backend Error!" }
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -325,24 +365,31 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
     }
 
     // --- 4. RTS Bus Tool Formatting ---
-    if (text.includes("Route") || text.includes("Leg")) {
+    if (text.includes("Route") || text.includes("Leg") || text.includes("Bus Schedule")) {
       const extractTimes = (str: string) => {
+        // Matches times like 10:50 AM or 10:50AM
         const timeRegex = /(\d{1,2}:\d{2}\s?[APM]{2})/gi;
         return str.match(timeRegex) || [];
       };
 
+      // Improved Direct Route Parsing: 
+      // Looks for "Route X" anywhere in a line that isn't a transfer leg
       const directRoutes = lines.filter(l => 
-        l.startsWith('- **Route') && !l.toLowerCase().includes('via')
+        /Route\s+\d+/i.test(l) && !l.toLowerCase().includes('leg')
       ).map(line => {
-        const route = line.match(/\*\*Route (.*?)\*\*/)?.[1] || "";
+        const routeMatch = line.match(/Route\s*(\d+)/i);
+        const route = routeMatch ? routeMatch[1] : "??";
         const times = extractTimes(line);
-        return { route, departs: times[0] || "N/A" };
+        // If no time in the route line, look at the next line in the original text
+        return { route, departs: times[0] || "See details" };
       });
 
+      // Improved Leg Parsing:
+      // Catches "First Leg", "Second Leg", etc.
       const legs = lines.filter(l => l.toLowerCase().includes('leg')).map(line => {
         const times = extractTimes(line);
         return {
-          text: line.replace(/^[-*]\s*/, '').replace(/\*\*/g, ''),
+          text: line.replace(/^[-*#\s]+/, '').replace(/\*\*/g, ''),
           departs: times[0],
           arrives: times[1]
         };
@@ -351,15 +398,21 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
       return (
         <div className="transit-container">
           <h3 className="bold-title">🚌 Bus Schedule</h3>
-          {directRoutes.map((bus, i) => (
-            <div key={i} className="bus-card">
-              <div className="bus-number">#{bus.route}</div>
-              <div className="bus-info">
-                <span className="bus-time">Departs: {bus.departs}</span>
-                <span className="bus-status">Direct Trip</span>
-              </div>
+          
+          {directRoutes.length > 0 && (
+            <div className="direct-trips-section">
+              {directRoutes.map((bus, i) => (
+                <div key={i} className="bus-card">
+                  <div className="bus-number">#{bus.route}</div>
+                  <div className="bus-info">
+                    <span className="bus-time">Departs: {bus.departs}</span>
+                    <span className="bus-status">Direct Trip</span>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
+
           {legs.length > 0 && (
             <div className="transfer-card">
               <div className="transfer-header">Transfer Details</div>
@@ -381,7 +434,11 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
               </div>
             </div>
           )}
-          <p className="footer-note-text">{lines[lines.length - 1]}</p>
+          
+          {/* Renders the "No direct scheduled trips" footer */}
+          <p className="footer-note-text">
+            {lines.find(l => l.toLowerCase().includes("no scheduled") || l.toLowerCase().includes("no direct"))}
+          </p>
         </div>
       );
     }
@@ -425,7 +482,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
           <p className="footer-note-text" style={{ margin: '8px 0' }}>{text.split('!')[0]}!</p>
           {imageSrc ? (
             <div className="cam-frame">
-              <div className="live-badge">● LIVE STREAM</div>
+              <div className="live-badge">● LIVE</div>
               <img src={imageSrc} alt="Gym Camera" className="gym-image" loading="lazy" />
               <div className="cam-timestamp">{new Date().toLocaleTimeString()}</div>
             </div>
@@ -476,7 +533,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
             )}
           </div>
           <div className="emergency-footer">
-            <p className="emergency-warning"><strong>Safety First:</strong> Dial <strong>911</strong> for emergencies.</p>
+            <p className="emergency-warning"><strong>Safety First:</strong> Dial <strong>911</strong> for emergencies or <strong>352-392-1111</strong></p>
           </div>
         </div>
       );
@@ -509,7 +566,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
         <h1 className="title">Welcome to One-Stop!</h1>
         <img src={botAvatar} alt="Gator Bot" className="welcome-gator" />
       </div>
-
+  
       <div className="messages-container">
         <div className="messages">
           {messages.map((msg, index) => (
@@ -528,8 +585,29 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
           )}
         </div>
       </div>
-
+  
       <div className="chat-box">
+        {/* 1. Hidden input - stays invisible */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          style={{ display: "none" }}
+          accept=".txt,.md"
+          onChange={handleFileUpload}
+        />
+        
+        {/* 2. Upload Button - Icon in bottom left */}
+        <button 
+          className="upload-icon-btn" 
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isLoading}
+        >
+          <img src={uploadIcon} alt="Upload" className="upload-png" />
+          <span className="upload-text">Upload & Summarize</span>
+        </button>
+
+        {/* 3. Textarea - Takes up the middle space */}
         <textarea
           className="chat-input"
           placeholder={isLoading ? "Gator is thinking..." : "Ask me anything..."}
@@ -539,11 +617,19 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
-              handleSend();
+              handleSend(); // No args needed here
             }
           }}
         />
-        <button className="send-button" onClick={handleSend}>Send</button>
+
+        {/* 4. Send Button - Right side (Fixes the TS Error) */}
+        <button 
+          className="send-button" 
+          onClick={() => handleSend()} // FIXED: Arrow function prevents Event vs String error
+          disabled={isLoading || !message.trim()}
+        >
+          Send
+        </button>
       </div>
     </div>
   );

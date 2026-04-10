@@ -71,6 +71,50 @@
   gap: 10px;
 }
 
+.upload-icon-btn {
+  position: absolute;   /* 👈 key change */
+  left: 12px;           /* adjust as needed */
+  bottom: 12px;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* Icon scaling and hover effect */
+.upload-png {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  opacity: 0.8;
+}
+
+.upload-icon-btn:hover .upload-png {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.upload-icon-btn:active {
+  transform: scale(0.95);
+}
+
+.upload-icon-btn:disabled {
+  cursor: not-allowed;
+  filter: grayscale(100%);
+  opacity: 0.3;
+}
+
+.upload-text {
+  font-family: 'Figtree', sans-serif;
+  font-size: 11px;
+  white-space: nowrap;
+  color:#0021A5
+}
+
 .bot-avatar {
   width: 36px;
   height: 36px;
@@ -107,12 +151,15 @@
 }
 
 .chat-box {
+  position: relative; /* 👈 add this */
+  width: 100%;
+  max-width: 700px;
+  min-height: 60px;
+  background-color: #f0f0f0;
+  border-radius: 20px;
+  padding: 10px 20px;
   display: flex;
-  align-items: center; /* Keeps everything aligned horizontally */
-  gap: 10px;
-  padding: 10px 15px;
-  background: white;
-  border-top: 1px solid #eee;
+  align-items: flex-end;
 }
 
 .attach-button {
@@ -135,11 +182,6 @@
 
 .attach-button:active {
   transform: scale(0.95);
-}
-
-/* Ensure textarea still takes up the remaining space */
-.chat-input {
-  flex: 1;
 }
 
 .bold-title {
@@ -651,22 +693,8 @@
   margin-top: 8px;
 }
 
-/* Adjusting StarRating size for the row */
 .star-wrapper {
   font-size: 0.85rem;
-}
-
-
-.chat-box {
-  width: 100%;
-  max-width: 700px;
-  min-height: 60px;
-  background-color: #f0f0f0;
-  border-radius: 20px;
-  padding: 10px 16px;
-  display: flex;
-  align-items: flex-end; 
-  gap: 10px;
 }
 
 .chat-input {
@@ -677,7 +705,8 @@
   outline: none;
   font-size: 16px;
   font-family: inherit;
-  padding: 8px 0;
+  padding: 14px 0;
+  margin-bottom: 30px;
 }
 
 .send-button {

@@ -142,7 +142,7 @@ const SidePanel: React.FC<SidePanelProps> = ({
                     {chat.title}
                   </li>
                 ))}
-                {filteredChats.length > MAX_VISIBLE_CHATS && (
+                {chats.length > MAX_VISIBLE_CHATS && (
                   <li
                     className="chat-item more-item"
                     onClick={() => setShowAllChats((prev) => !prev)}

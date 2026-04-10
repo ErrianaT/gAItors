@@ -187,48 +187,68 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
   const renderMessageContent = (text: string) => {
     const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
   
-    // --- 1. Professor Tool Formatting ---
-    if (text.toLowerCase().includes("quality rating")) {
-      const data = parseBotString(text);
+    // --- 1. Professor Tool Formatting (Hybrid Version) ---
+    if (text.toLowerCase().includes("quality rating") || text.toLowerCase().includes("professor")) {
+      // Try structured parsing first
+      const data = typeof parseBotString === 'function' ? parseBotString(text) : {};
       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
       
-      // removing everything except numbers and decimals for the rating
-      const rawRating = data['quality rating'] || data['rating'] || "0";
-      const rating = parseFloat(rawRating.replace(/[^0-9.]/g, '')) || 0;
+      // 1. RATING: Try Key-Value, then Regex fallback
+      const rawRating = data['quality rating'] || data['rating'];
+      const ratingMatch = text.match(/(\d\.\d)\s*\/\s*5/) || text.match(/rating of (\d\.\d)/i);
+      const rating = rawRating 
+        ? parseFloat(rawRating.replace(/[^0-9.]/g, '')) 
+        : (ratingMatch ? parseFloat(ratingMatch[1]) : 0);
       
-      const name = (data['professor'] || "Instructor").replace(/\*/g, '');
-    
-      // collecting lines that don't have the following
-      const paragraphs = lines.filter(l => 
-        !l.includes(':') && 
-        !l.includes('**') && 
+      // 2. RETAKE: Try Key-Value, then Regex fallback for any %
+      const takeAgain = data['would take again'] || (text.match(/(\d+%)/)?.[1] || null);
+
+      // 3. DIFFICULTY: Try Key-Value, then Regex fallback
+      const difficulty = data['level of difficulty'] || (text.match(/difficulty.*?(\d\.\d)/i)?.[1] || null);
+
+      // 4. NAME: Try Key-Value, then Regex fallback
+      const name = (data['professor'] || text.match(/Professor:?\s*([A-Za-z\s]+)/i)?.[1] || "Instructor").replace(/\*/g, '');
+
+      // 5. DESCRIPTION: Filter out the stats to find the actual "meat" of the feedback
+      const feedbackParagraphs = lines.filter(l => 
+        !l.toLowerCase().includes('quality rating') && 
+        !l.toLowerCase().includes('would take again') &&
+        !l.toLowerCase().includes('difficulty') &&
         !l.startsWith('#')
       );
-    
+
       return (
         <div className="formatted-bot-msg prof-card">
-          <h3 className="bold-title">Professor {name}</h3>
+          <h3 className="bold-title">Professor {name.trim()}</h3>
           <StarRating rating={rating} />
           
           <div className="prof-stats-grid">
-            {data['would take again'] && (
+            {takeAgain && (
               <div className="stat-pill">
                 <span className="stat-label">Retake:</span>
-                <span className="stat-value">{data['would take again']}</span>
+                <span className="stat-value">{takeAgain}</span>
               </div>
             )}
-            {data['level of difficulty'] && (
+            {difficulty && (
               <div className="stat-pill">
                 <span className="stat-label">Difficulty:</span>
-                <span className="stat-value">{data['level of difficulty']}</span>
+                <span className="stat-value">{difficulty}</span>
               </div>
             )}
           </div>
-    
+
           <div className="prof-content">
-            <p className="prof-description">
-              {paragraphs.join(' ').replace(/^[0-9.\s-]+/, '')}
-            </p>
+            <div className="prof-description">
+              {feedbackParagraphs.length > 0 ? (
+                feedbackParagraphs.map((p, i) => (
+                  <p key={i} className={p.startsWith('-') ? "feedback-bullet" : ""}>
+                    {formatBoldText(p.replace(/^[-•]\s*/, ''))}
+                  </p>
+                ))
+              ) : (
+                <p>No feedback available.</p>
+              )}
+            </div>
           </div>
         </div>
       );

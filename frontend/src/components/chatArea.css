@@ -106,6 +106,42 @@
   flex-direction: column;
 }
 
+.chat-box {
+  display: flex;
+  align-items: center; /* Keeps everything aligned horizontally */
+  gap: 10px;
+  padding: 10px 15px;
+  background: white;
+  border-top: 1px solid #eee;
+}
+
+.attach-button {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0;
+  color: #666;
+  transition: color 0.2s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.attach-button:hover {
+  color: #0021A5; /* UF Blue */
+  transform: scale(1.1);
+}
+
+.attach-button:active {
+  transform: scale(0.95);
+}
+
+/* Ensure textarea still takes up the remaining space */
+.chat-input {
+  flex: 1;
+}
+
 .bold-title {
   margin: 0 0 5px 0;
   color: #0021a5;

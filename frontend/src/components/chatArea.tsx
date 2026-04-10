@@ -155,26 +155,50 @@ const formatBoldText = (text: string) => {
 
 const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
   const [message, setMessage] = useState("");
+  const [file, setFile] = useState<File | null>(null); // Track the selected file
   const [isLoading, setIsLoading] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null); // Ref to trigger the hidden input
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+    }
+  };
 
   const handleSend = async () => {
-    if (!message.trim() || isLoading) return;
-    const userMessage: Message = { sender: "user", text: message };
+    if ((!message.trim() && !file) || isLoading) return;
+
+    // If there's a file, we append the name to the user's bubble for clarity
+    const userText = file ? `${message} (Attachment: ${file.name})`.trim() : message;
+    const userMessage: Message = { sender: "user", text: userText };
     const initialMessages = [...messages, userMessage];
+    
     onSendMessage(initialMessages);
+    const currentMessage = message; // Store to send to backend
+    const currentFile = file;
+    
     setMessage("");
+    setFile(null); // Reset file state
     setIsLoading(true);
 
     try {
+      // Use FormData for multipart/form-data (required for file uploads)
+      const formData = new FormData();
+      formData.append("content", currentMessage);
+      if (currentFile) {
+        formData.append("file", currentFile);
+      }
+
       const response = await fetch("http://localhost:8080/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: "user", content: userMessage.text }),
+        // Do NOT set Content-Type header; the browser will set it automatically with the boundary
+        body: formData,
       });
+
       const data = await response.json();
       const botMessage: Message = {
         sender: "bot",
-        text: data.content || "I couldn't find that professor.",
+        text: data.content || "I've processed your document.",
       };
       onSendMessage([...initialMessages, botMessage]);
     } catch (error) {
@@ -187,29 +211,22 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
   const renderMessageContent = (text: string) => {
     const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
   
-    // --- 1. Professor Tool Formatting (Hybrid Version) ---
+    // --- 1. Professor Tool Formatting ---
     if (text.toLowerCase().includes("quality rating") || text.toLowerCase().includes("professor")) {
-      // Try structured parsing first
       const data = typeof parseBotString === 'function' ? parseBotString(text) : {};
       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
       
-      // 1. RATING: Try Key-Value, then Regex fallback
       const rawRating = data['quality rating'] || data['rating'];
       const ratingMatch = text.match(/(\d\.\d)\s*\/\s*5/) || text.match(/rating of (\d\.\d)/i);
       const rating = rawRating 
         ? parseFloat(rawRating.replace(/[^0-9.]/g, '')) 
         : (ratingMatch ? parseFloat(ratingMatch[1]) : 0);
-      
-      // 2. RETAKE: Try Key-Value, then Regex fallback for any %
+
       const takeAgain = data['would take again'] || (text.match(/(\d+%)/)?.[1] || null);
 
-      // 3. DIFFICULTY: Try Key-Value, then Regex fallback
       const difficulty = data['level of difficulty'] || (text.match(/difficulty.*?(\d\.\d)/i)?.[1] || null);
-
-      // 4. NAME: Try Key-Value, then Regex fallback
       const name = (data['professor'] || text.match(/Professor:?\s*([A-Za-z\s]+)/i)?.[1] || "Instructor").replace(/\*/g, '');
 
-      // 5. DESCRIPTION: Filter out the stats to find the actual "meat" of the feedback
       const feedbackParagraphs = lines.filter(l => 
         !l.toLowerCase().includes('quality rating') && 
         !l.toLowerCase().includes('would take again') &&
@@ -294,7 +311,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
         </div>
       );
     }
-    // --- 3. Weather Logic ---
+    // --- 3. Weather Tool Formatting ---
     if (text.includes("°F") || text.toLowerCase().includes("forecast")) {
       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
       
@@ -492,63 +509,66 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
       );
     }
 
-    // --- 7. Blue Phone / Emergency Tool ---
-    // --- 7. Blue Phone / Emergency Tool (Adaptive Version) ---
-    if (text.toLowerCase().includes("blue safety phone") || text.toLowerCase().includes("blue emergency phone") || text.includes("blue phone")) {
-      
-      // 1. Capture Location: Handles "Reitz Union North" OR NW Holland Law (Building 757)
-      const locationMatch = text.match(/at\s+["']?([^"']+)["']?,\s+approximately/i) || 
-                            text.match(/at the (.*?) \(Building (\d+)\)/i);
-      
-      const buildingDisplay = locationMatch ? locationMatch[1] : "Campus Location";
-      
-      // 2. Capture Distance/Time
-      const distanceMatch = text.match(/approximately (.*?) away/i) || text.match(/around (.*?) and/i);
-      const distance = distanceMatch ? distanceMatch[1] : "Nearby";
+      // --- 7. Blue Phone / Emergency Tool (Adaptive + Map Version) ---
+  if (text.toLowerCase().includes("blue safety phone") || text.toLowerCase().includes("blue emergency phone") || text.includes("blue phone")) {
+    
+    // 1. Capture Location: Handles "Reitz Union North" OR NW Holland Law (Building 757)
+    const locationMatch = text.match(/at\s+["']?([^"']+)["']?,\s+approximately/i) || 
+                          text.match(/at the (.*?) \(Building (\d+)\)/i);
+    
+    const buildingDisplay = locationMatch ? locationMatch[1] : "Campus Location";
+    
+    // 2. Capture Distance/Time
+    const distanceMatch = text.match(/approximately (.*?) away/i) || text.match(/around (.*?) and/i);
+    const distance = distanceMatch ? distanceMatch[1] : "Nearby";
 
-      // 3. Capture Directions (Look for numbered lines)
-      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-      const directions = lines.filter(l => /^\d+\./.test(l));
+    // 3. Capture Directions (Look for numbered lines)
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    const directions = lines.filter(l => /^\d+\./.test(l));
 
-      return (
-        <div className="emergency-card">
-          <div className="emergency-header">
-            <span className="emergency-icon">🚨</span>
-            <h3 className="emergency-title">Blue Phone Locator</h3>
+    return (
+      <div className="emergency-card">
+        <div className="emergency-header">
+          <span className="emergency-icon">🚨</span>
+          <h3 className="emergency-title">Blue Phone Locator</h3>
+        </div>
+        
+        <div className="emergency-body">
+          <div className="loc-main">
+            <span className="loc-label">Target Location</span>
+            <div className="loc-value-row">
+              <span className="loc-value">{buildingDisplay}</span>
+              <span className="dist-tag">{distance}</span>
+            </div>
           </div>
-          
-          <div className="emergency-body">
-            <div className="loc-main">
-              <span className="loc-label">Target Location</span>
-              <div className="loc-value-row">
-                <span className="loc-value">{buildingDisplay}</span>
-                <span className="dist-tag">{distance}</span>
+
+          <div className="mini-map-container" style={{ height: '200px', margin: '12px 0', borderRadius: '8px', overflow: 'hidden' }}>
+            <LeafletMap locationName={buildingDisplay} />
+          </div>
+
+          {directions.length > 0 && (
+            <div className="directions-box">
+              <span className="loc-label">Walking Directions</span>
+              <div className="steps-list">
+                {directions.map((step, i) => (
+                  <div key={i} className="step-item">
+                    <span className="step-num">{i + 1}</span>
+                    <span className="step-text">{formatBoldText(step.replace(/^\d+\.\s*/, ''))}</span>
+                  </div>
+                ))}
               </div>
             </div>
-
-            {directions.length > 0 && (
-              <div className="directions-box">
-                <span className="loc-label">Walking Directions</span>
-                <div className="steps-list">
-                  {directions.map((step, i) => (
-                    <div key={i} className="step-item">
-                      <span className="step-num">{i + 1}</span>
-                      <span className="step-text">{step.replace(/^\d+\.\s*/, '')}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="emergency-footer">
-            <p className="emergency-warning">
-              <strong>Safety First:</strong> If you are in immediate danger, dial <strong>911</strong> or <strong>352-392-1111</strong>.
-            </p>
-          </div>
+          )}
         </div>
-      );
-    }
+
+        <div className="emergency-footer">
+          <p className="emergency-warning">
+            <strong>Safety First:</strong> If you are in immediate danger, dial <strong>911</strong> or <strong>352-392-1111</strong>.
+          </p>
+        </div>
+      </div>
+    );
+  }
   
     // --- #. Fallback & Default Formatting---
     return (
@@ -603,20 +623,45 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
         </div>
       </div>
 
+      {/* NEW: File status indicator just above the box */}
+      {file && (
+        <div style={{ fontSize: '12px', color: '#0021A5', padding: '0 20px 5px' }}>
+          📎 Ready to upload: <strong>{file.name}</strong>
+        </div>
+      )}
+
       <div className="chat-box">
-      <textarea
-        className="chat-input"
-        placeholder={isLoading ? "Gator is thinking..." : "Ask me anything..."}
-        value={message}
-        disabled={isLoading}
-        onChange={(e) => setMessage(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            handleSend();
-          }
-        }}
-      />
+        {/* Hidden File Input */}
+        <input 
+          type="file" 
+          ref={fileInputRef} 
+          style={{ display: 'none' }} 
+          onChange={handleFileChange}
+          accept=".pdf,.doc,.docx,.txt"
+        />
+        
+        {/* Attachment Button */}
+        <button 
+          className="attach-button" 
+          onClick={() => fileInputRef.current?.click()}
+          title="Upload document"
+        >
+          🔗
+        </button>
+
+        <textarea
+          className="chat-input"
+          placeholder={isLoading ? "Gator is thinking..." : "Ask me anything..."}
+          value={message}
+          disabled={isLoading}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleSend();
+            }
+          }}
+        />
         <button className="send-button" onClick={handleSend}>Send</button>
       </div>
     </div>

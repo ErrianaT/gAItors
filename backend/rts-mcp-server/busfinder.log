@@ -956,3 +956,5 @@
 2026/04/10 13:55:07 Indexed 91516 stop_times from ../data/stop_times.txt into 3409 trips
 2026/04/10 14:19:20 Loaded 952 GTFS stops from ../data/stops.txt
 2026/04/10 14:19:20 Indexed 91516 stop_times from ../data/stop_times.txt into 3409 trips
+2026/04/13 14:10:20 Loaded 952 GTFS stops from ../data/stops.txt
+2026/04/13 14:10:20 Indexed 91516 stop_times from ../data/stop_times.txt into 3409 trips

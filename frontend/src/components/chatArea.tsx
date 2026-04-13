@@ -12,6 +12,13 @@ import L from 'leaflet';
 // Fix for default marker icons not showing up in Webpack/Vite
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import * as pdfjsLib from "pdfjs-dist";
+import mammoth from "mammoth";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.min.mjs",
+  import.meta.url
+).toString();
 
 type Message = {
   sender: "user" | "bot";
@@ -70,7 +77,7 @@ const ChangeView: React.FC<{ center: [number, number] }> = ({ center }) => {
 };
 
 const LeafletMap: React.FC<{ locationName: string }> = ({ locationName }) => {
-  const [position, setPosition] = useState<[number, number]>([29.6465, -82.3477]); // Default UF Center
+  const [position, setPosition] = useState<[number, number]>([29.6465, -82.3477]); // default Reitz Union
 
   useEffect(() => {
     const fetchCoords = async () => {
@@ -149,36 +156,80 @@ const formatBoldText = (text: string) => {
   });
 };
 
+const extractPDFText = async (file: File) => {
+  const arrayBuffer = await file.arrayBuffer();
+
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+  let text = "";
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+
+    const strings = content.items.map((item: any) => item.str);
+    text += strings.join(" ") + "\n";
+  }
+
+  return text.trim();
+};
+
+const extractDocxText = async (file: File) => {
+  const arrayBuffer = await file.arrayBuffer();
+
+  const result = await mammoth.extractRawText({
+    arrayBuffer
+  });
+
+  return result.value; // plain text
+};
+
 
 const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
   
-    const reader = new FileReader();
+    let rawText = "";
   
-    reader.onload = async (e) => {
-      const rawText = e.target?.result as string;
+    try {
+      if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
+        rawText = await extractPDFText(file);
+      } 
+      else if (
+        file.name.endsWith(".docx") ||
+        file.type.includes("wordprocessingml")
+      ) {
+        rawText = await extractDocxText(file);
+      } 
+      else {
+        rawText = await file.text();
+      }
   
-      const backendMessage = `I uploaded a document named "${file.name}".
+      const backendMessage = `
+  I uploaded a document named "${file.name}".
   
   Here is its content:
   
   ${rawText}
   
-  Please summarize this document.`;
+  Please summarize this document.
+  `;
   
-      const displayMessage = `📎 Uploaded ${file.name}`;
+      await handleSend(backendMessage, `📎 Uploaded ${file.name}`);
+    } catch (err) {
+      console.error(err);
+      await handleSend(
+        "Error reading file. Please try again.",
+        "❌ Upload failed"
+      );
+    }
   
-      await handleSend(backendMessage, displayMessage);
-    };
-  
-    reader.readAsText(file);
+    // reset input so same file can be uploaded again
     event.target.value = "";
   };
 
@@ -367,13 +418,10 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
     // --- 4. RTS Bus Tool Formatting ---
     if (text.includes("Route") || text.includes("Leg") || text.includes("Bus Schedule")) {
       const extractTimes = (str: string) => {
-        // Matches times like 10:50 AM or 10:50AM
         const timeRegex = /(\d{1,2}:\d{2}\s?[APM]{2})/gi;
         return str.match(timeRegex) || [];
       };
 
-      // Improved Direct Route Parsing: 
-      // Looks for "Route X" anywhere in a line that isn't a transfer leg
       const directRoutes = lines.filter(l => 
         /Route\s+\d+/i.test(l) && !l.toLowerCase().includes('leg')
       ).map(line => {
@@ -384,8 +432,6 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
         return { route, departs: times[0] || "See details" };
       });
 
-      // Improved Leg Parsing:
-      // Catches "First Leg", "Second Leg", etc.
       const legs = lines.filter(l => l.toLowerCase().includes('leg')).map(line => {
         const times = extractTimes(line);
         return {
@@ -435,7 +481,6 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
             </div>
           )}
           
-          {/* Renders the "No direct scheduled trips" footer */}
           <p className="footer-note-text">
             {lines.find(l => l.toLowerCase().includes("no scheduled") || l.toLowerCase().includes("no direct"))}
           </p>
@@ -469,7 +514,6 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
         );
         if (foundKey) {
           imageSrc = GYM_URLS[foundKey];
-          detectedLocation = foundKey.replace('_', ' ').toUpperCase();
         }
       }
 
@@ -587,16 +631,13 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
       </div>
   
       <div className="chat-box">
-        {/* 1. Hidden input - stays invisible */}
         <input
           type="file"
           ref={fileInputRef}
           style={{ display: "none" }}
-          accept=".txt,.md"
+          accept=".txt,.md,.pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
           onChange={handleFileUpload}
         />
-        
-        {/* 2. Upload Button - Icon in bottom left */}
         <button 
           className="upload-icon-btn" 
           type="button"
@@ -606,8 +647,6 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
           <img src={uploadIcon} alt="Upload" className="upload-png" />
           <span className="upload-text">Upload & Summarize</span>
         </button>
-
-        {/* 3. Textarea - Takes up the middle space */}
         <textarea
           className="chat-input"
           placeholder={isLoading ? "Gator is thinking..." : "Ask me anything..."}
@@ -617,15 +656,14 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
-              handleSend(); // No args needed here
+              handleSend();
             }
           }}
         />
 
-        {/* 4. Send Button - Right side (Fixes the TS Error) */}
         <button 
           className="send-button" 
-          onClick={() => handleSend()} // FIXED: Arrow function prevents Event vs String error
+          onClick={() => handleSend()} 
           disabled={isLoading || !message.trim()}
         >
           Send

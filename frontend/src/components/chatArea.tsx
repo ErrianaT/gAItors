@@ -293,7 +293,81 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
 
   const renderMessageContent = (text: string) => {
     const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-  
+    // --- 8. RAG tool ---
+    if (
+      text.includes("fileSearchStores/") ||
+      text.includes("file search store")
+    ) {
+      // console.log("RAG BLOCK HIT");
+    
+      const blocks = text
+        .split(/\n(?=- name:)/) // 🔥 KEY FIX
+        .filter(b => b.includes("displayName"));
+    
+      // console.log("RAW BLOCKS:", blocks);
+    
+      const docs = blocks.map((block, i) => {
+        const clean = block.replace(/\r/g, "");
+    
+        // console.log(`\n--- BLOCK ${i + 1} ---\n`, clean);
+    
+        const get = (key: string) => {
+          const regex = new RegExp(`-\\s*${key}:\\s*(.+)`, "i");
+          const match = clean.match(regex);
+          const value = match?.[1]?.trim();
+    
+          // console.log(`  ${key}:`, value);
+          return value;
+        };
+    
+        return {
+          name: get("displayName") || get("name") || "Untitled",
+          size: get("sizeBytes"),
+          type: get("mimeType"),
+          state: get("state"),
+          date: get("createTime"),
+        };
+      });
+    
+      return (
+        <div className="file-tool-container">
+          <h3 className="bold-title">📁 Course Documents</h3>
+    
+          {docs.length === 0 ? (
+            <p style={{ color: "orange" }}>
+              ⚠️ No docs parsed (check console)
+            </p>
+          ) : (
+            <div className="file-grid">
+              {docs.map((doc, i) => (
+                <div key={i} className="file-card">
+                  <div className="file-header">
+                    <span className="file-name">{doc.name}</span>
+                    <span className="file-badge">{doc.state}</span>
+                  </div>
+    
+                  <div className="file-meta">
+                    {doc.type && <span>{doc.type}</span>}
+                    {doc.size && (
+                      <span>
+                        {" "}
+                        • {(Number(doc.size) / 1024).toFixed(1)} KB
+                      </span>
+                    )}
+                  </div>
+    
+                  {doc.date && (
+                    <div className="file-date">
+                      {new Date(doc.date).toLocaleDateString()}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
     // --- 1. Professor Tool Formatting ---
     if (text.toLowerCase().includes("quality rating") || text.toLowerCase().includes("professor")) {
       const data = parseBotString(text);
@@ -535,7 +609,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
     }
     
     
-    // --- 7. Blue Phone / Emergency Tool ---
+    // --- 7. Blue Phone Tool ---
     if (text.toLowerCase().includes("blue safety phone") || text.toLowerCase().includes("blue emergency phone") || text.includes("blue phone")) {
       const locationMatch = text.match(/at\s+["']?([^"']+)["']?,\s+approximately/i) || text.match(/at the (.*?) \(Building (\d+)\)/i);
       const buildingDisplay = locationMatch ? locationMatch[1] : "Campus Location";

@@ -284,89 +284,140 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
       ]);
   
     } finally {
-      // ✅ THIS IS WHAT YOU ARE MISSING
       setIsLoading(false);
     }
   };
 
   
-
   const renderMessageContent = (text: string) => {
     const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+   
     // --- 8. RAG tool ---
-    if (
-      text.includes("fileSearchStores/") ||
-      text.includes("file search store")
-    ) {
-      // console.log("RAG BLOCK HIT");
-    
-      const blocks = text
-        .split(/\n(?=- name:)/) // 🔥 KEY FIX
-        .filter(b => b.includes("displayName"));
-    
-      // console.log("RAW BLOCKS:", blocks);
-    
-      const docs = blocks.map((block, i) => {
-        const clean = block.replace(/\r/g, "");
-    
-        // console.log(`\n--- BLOCK ${i + 1} ---\n`, clean);
-    
-        const get = (key: string) => {
-          const regex = new RegExp(`-\\s*${key}:\\s*(.+)`, "i");
-          const match = clean.match(regex);
-          const value = match?.[1]?.trim();
-    
-          // console.log(`  ${key}:`, value);
-          return value;
-        };
-    
-        return {
-          name: get("displayName") || get("name") || "Untitled",
-          size: get("sizeBytes"),
-          type: get("mimeType"),
-          state: get("state"),
-          date: get("createTime"),
-        };
-      });
-    
-      return (
-        <div className="file-tool-container">
-          <h3 className="bold-title">📁 Course Documents</h3>
-    
-          {docs.length === 0 ? (
-            <p style={{ color: "orange" }}>
-              ⚠️ No docs parsed (check console)
-            </p>
-          ) : (
-            <div className="file-grid">
-              {docs.map((doc, i) => (
-                <div key={i} className="file-card">
-                  <div className="file-header">
-                    <span className="file-name">{doc.name}</span>
-                    <span className="file-badge">{doc.state}</span>
-                  </div>
-    
-                  <div className="file-meta">
-                    {doc.type && <span>{doc.type}</span>}
-                    {doc.size && (
-                      <span>
-                        {" "}
-                        • {(Number(doc.size) / 1024).toFixed(1)} KB
-                      </span>
-                    )}
-                  </div>
-    
-                  {doc.date && (
-                    <div className="file-date">
-                      {new Date(doc.date).toLocaleDateString()}
-                    </div>
-                  )}
-                </div>
-              ))}
+    const isUploadConfirmation =
+    text.toLowerCase().includes("successfully uploaded") ||
+    text.toLowerCase().includes("has been successfully uploaded");
+
+    const isRAGDocumentList =
+    /fileSearchStores\/.+\/documents/.test(text) &&
+    text.includes("displayName:");
+
+    // upload confirmation formatting
+    if (isUploadConfirmation) {
+    const fileNameMatch = text.match(/"([^"]+\.(pdf|docx|txt|md))"/i);
+    const fileName = fileNameMatch?.[1] || "Uploaded file";
+
+    const operationMatch = text.match(/fileSearchStores\/[^\s"]+/);
+    const operationId = operationMatch?.[0];
+
+    return (
+      <div className="upload-success-card">
+        <div className="upload-header">
+          <span className="upload-icon">📎</span>
+          <h3 className="upload-title">Upload Successful</h3>
+        </div>
+
+        <div className="upload-body">
+          <p className="upload-file-name">{fileName}</p>
+
+          <p className="upload-status">
+            Your document has been added to the file search store.
+          </p>
+
+          {operationId && (
+            <div className="upload-meta">
+              <span className="upload-badge">Added</span>
             </div>
           )}
         </div>
-      );
+      </div>
+    );
+    }
+
+    // listing documents formatting
+    if (isRAGDocumentList) {
+    console.log("📁 RAG BLOCK TRIGGERED");
+
+    const formatName = (path: string) => {
+      if (!path) return "Untitled";
+
+      // extract filename after /documents/
+      const match = path.match(/documents\/(.+)$/);
+      const raw = match?.[1] || path;
+
+      return raw
+        .replace(/\.pdf|\.docx|\.txt|\.md/gi, "")
+        .replace(/-/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    };
+
+    const blocks = text
+      .split(/\n(?=- name:)/)
+      .filter(b => b.includes("displayName"));
+
+    const docs = blocks.map((block) => {
+      const clean = block.replace(/\r/g, "");
+
+      const get = (key: string) => {
+        const regex = new RegExp(`-\\s*${key}:\\s*(.+)`, "i");
+        const match = clean.match(regex);
+        return match?.[1]?.trim();
+      };
+
+      const rawName = get("name") || "";
+
+      return {
+        name: get("displayName") || formatName(rawName),
+        rawName, // (optional debug use)
+        size: get("sizeBytes"),
+        type: get("mimeType"),
+        state: get("state"),
+        date: get("createTime"),
+      };
+    });
+
+    return (
+      <div className="file-tool-container">
+        <h3 className="bold-title">📁 Course Documents</h3>
+
+        {docs.length === 0 ? (
+          <p style={{ color: "orange" }}>
+            ⚠️ No documents parsed (check format)
+          </p>
+        ) : (
+          <div className="file-grid">
+            {docs.map((doc, i) => (
+              <div key={i} className="file-card">
+                <div className="file-header">
+                  <span className="file-name">{doc.name}</span>
+                  <span className="file-badge">{doc.state}</span>
+                </div>
+
+                <div className="file-meta">
+                  {doc.type && <span>{doc.type}</span>}
+                  {doc.size && (
+                    <span>
+                      {" "}
+                      • {(Number(doc.size) / 1024).toFixed(1)} KB
+                    </span>
+                  )}
+                </div>
+
+                {doc.date && (
+                  <div className="file-date-group">
+                    <div className="file-date">
+                      {new Date(doc.date).toLocaleDateString()}
+                    </div>
+                    <div className="raw-name"><strong>Use the following for deleting a file from file search store:</strong></div>
+                    <div className="raw-name">raw name: {doc.rawName}</div>
+                  </div>
+                )} 
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
     }
     // --- 1. Professor Tool Formatting ---
     if (text.toLowerCase().includes("quality rating") || text.toLowerCase().includes("professor")) {

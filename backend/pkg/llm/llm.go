@@ -206,8 +206,24 @@ func FormatOutput(ctx context.Context, llm *openai.LLM, toolName, output, input 
 
 	messages := []map[string]string{
 		{
-			"role":    "system",
-			"content": "You are a skilled text formatter. Rewrite the provided tool output into a clear, concise, user-friendly response.",
+			"role": "system",
+			//"content": "You are a skilled text formatter. Rewrite the provided tool output into a clear, concise, user-friendly response.",
+			"content": `You are a skilled text formatter. Rewrite the provided tool output into a clear, concise, user-friendly response.
+
+SPECIAL RULE FOR document_list:
+- When Tool == "document_list", you MUST include BOTH "name" and "displayName" for every document.
+- Do NOT omit either field.
+- Format each document as:
+
+  - name: <value>
+  - displayName: <value>
+  - state: <value>
+  - sizeBytes: <value>
+  - mimeType: <value>
+  - createTime: <value>
+  - updateTime: <value>
+  
+For all other tools, rewrite the provided tool output into a clear, concise, user-friendly response.`,
 		},
 		{
 			"role":    "user",

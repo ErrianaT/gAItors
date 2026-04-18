@@ -401,7 +401,6 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
       const footerText = lastLine.startsWith("-") ? "" : lastLine;
 
       const weatherData = lines
-        // grab anything that looks like a forecast line
         .filter(line => /(\d+(\.\d+)?°F)/.test(line))
         .map(line => {
           // --- TIME ---
@@ -419,7 +418,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
             .replace(/\*\*/g, "")
             .replace(/^-/, "")
             .trim();
-          // --- TEMPERATURE (robust) ---
+          // --- TEMPERATURE ---
           const tempMatch = line.match(/(\d+(\.\d+)?°F)/);
           const temp = tempMatch ? tempMatch[1] : "N/A";
 
@@ -430,14 +429,13 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
           // --- CONDITION ---
           let condition = "Clear";
 
-          // try to extract text between ":" and temp
           const afterColon = line.split(":")[1] || "";
 
           if (afterColon) {
             const cleaned = afterColon
-              .replace(/(\d+(\.\d+)?°F)/, "") // remove temp
-              .replace(/(\d+%)/, "")         // remove humidity
-              .replace(/[,|]/g, "")          // remove separators
+              .replace(/(\d+(\.\d+)?°F)/, "") 
+              .replace(/(\d+%)/, "")    
+              .replace(/[,|]/g, "")   
               .trim();
 
             if (cleaned.length > 0) {
@@ -490,50 +488,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
       );
     }
 
-    // const GYM_URLS: Record<string, string> = {
-    //   "srfc_weight":   "http://recsports.ufl.edu/cam/cam8.jpg",
-    //   "srfc_cardio":   "http://recsports.ufl.edu/cam/cam7.jpg",
-    //   "swrc_weight1":  "http://recsports.ufl.edu/cam/cam1.jpg",
-    //   "swrc_weight2":  "http://recsports.ufl.edu/cam/cam4.jpg",
-    //   "swrc_cardio":   "http://recsports.ufl.edu/cam/cam5.jpg",
-    //   "swrc_basket12": "http://recsports.ufl.edu/cam/cam3.jpg",
-    //   "swrc_basket34": "http://recsports.ufl.edu/cam/cam2.jpg",
-    //   "swrc_basket56": "http://recsports.ufl.edu/cam/cam6.jpg",
-    // };
-
     // --- 5. Gym Camera Tool Formatting ---
-    // if (text.toLowerCase().includes("gym") || text.toLowerCase().includes("camera") || text.toLowerCase().includes("crowd")) {
-    //   let imageSrc = null;
-    //   let detectedLocation = "Camera Feed";
-    
-    //   const base64Match = text.match(/([A-Za-z0-9+/=\s]{3000,})/);
-    
-    //   if (base64Match) {
-    //     const cleaned = base64Match[1].replace(/\s/g, '');
-    //     imageSrc = `data:image/jpeg;base64,${cleaned}`;
-    //   }
-    
-    //   console.log(imageSrc);
-
-    //   return (
-    //     <div className="gym-cam-container">
-    //       <div className="place-header-row">
-    //         <h3 className="bold-title">🏋️ {detectedLocation}</h3>
-    //         <span className="place-price-tag">LIVE</span>
-    //       </div>
-    //       <p className="footer-note-text" style={{ margin: '8px 0' }}>{text.split('!')[0]}!</p>
-    //       {imageSrc ? (
-    //         <div className="cam-frame">
-    //           <div className="live-badge">● LIVE</div>
-    //           <img src={imageSrc} alt="Gym Camera" className="gym-image" loading="lazy" />
-    //           <div className="cam-timestamp">{new Date().toLocaleTimeString()}</div>
-    //         </div>
-    //       ) : (
-    //         <div className="cam-placeholder"><p>Unable to load live image.</p></div>
-    //       )}
-    //     </div>
-    //   );
-    // }
     if (
       text.toLowerCase().includes("gym") ||
       text.toLowerCase().includes("camera") ||
@@ -542,7 +497,6 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
       let detectedLocation = "Camera Feed";
       let imageSrc: string | null = null;
     
-      // ✅ safer regex (prevents catastrophic backtracking / huge match issues)
       const match = text.match(/\[IMAGE_DATA\]:([\s\S]+)/);
     
       if (match?.[1]) {

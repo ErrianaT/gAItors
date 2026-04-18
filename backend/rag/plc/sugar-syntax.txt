@@ -1,0 +1,40 @@
+In this assignment, you will implement a basic search/filter system to experiment with some interesting features of Python.
+
+Setup/Submission
+Setup: Search.py Download Search.py contains the provided code. You can use an online editor such as OneCompilerLinks to an external site. (save regularly!), or setup a local environment that can run Python 3.5 (recommended).
+Submission: You will submit your updated Search.py file. You should only implement the given functions the surrounding code structure and logic should be left unchanged (but you may add additional tests as desired).
+Python Overview
+Python is a programming language named after Monty Python; not the snake. Beyond basic syntax, there are two notable features that need to be understood for this assignment:
+
+[List] Comprehensions (Part 1): Allows transforming iterable values using map/filter logic, e.g. [num * num for num in nums if num % 2 == 0].
+Decorators (Part 2): Allows wrapping a function to customize it's behavior, e.g. @cache def fib(n): ....
+Note that when decorators have arguments, the precedence is @(returnsDecorator("argument")) def function(): ..., i.e. the "decorator" is really a function call that returns the real decorator used by @.
+
+Part 1
+Implement the query functions on the provided games dataset using comprehensions. You may assume that all arguments passed are valid; no need for any additional validation (see Part 3). Ensure you do not use loops or builtin map/filter methods (which use lambdas) - only comprehensions. You can use intermediate variables as well to help make this easier to manage.
+
+Function	Description	
+queryAll	Returns all games in the format returned by format.	
+queryByName	Returns all games with names that contain a match for the given regex. See docs for the re moduleLinks to an external site., which has been imported for you.	
+queryByPrice	Returns all games with prices within the given min/max range, inclusive.	
+queryByRating	Returns all games with ratings at least the given min value, inclusive. The rating of a game is the average of all of it's reviews ratings. 	
+queryBy	Combines the behavior of queryByName/queryByPrice/queryByRating into a single method.	
+
+Part 2
+Function: contract	
+Description: Takes a single condition argument, and returns a decorator which has the following behavior:
+- Evaluates condition using eval, in a scope that includes:
+  All function parameters/arguments that would normally be accessible. Start with inspect.signature (https://docs.python.org/3/library/inspect.html#inspect.signature) (already imported) and follow that to determine how to get a dict linking parameters to arguments.
+
+Bonus: Other global/nonlocal variables that would normally be accessible as well. Global is moderately difficult, nonlocal is quite tricky!
+
+If the condition is falsey, return False. Otherwise, call and return the decorated function as normal.
+
+Note: This decorator can only be used once - you're welcome to try getting it to work multiple times, but that's beyond the scope of this assignment.
+
+Part 3
+Function	Description	
+queryByName	The given regex cannot be empty.	
+queryByPrice	The given min must be at least 0 and at most max.	
+queryByRating	The given min must be at least 1 and at most 5.	
+queryBy	Follows the same requirements as above.	

@@ -8,7 +8,7 @@ SET LLM_TOKEN=<LLM_TOKEN>
 
 echo "RAG MCP Serevr Starting..."
 SET GEMINI_API_KEY=<GEMINI_API_KEY>
-SET FILE_LOCATION="/Users/errianathomas/Documents/GitHub/gAItors/"
+SET FILE_LOCATION="/Users/errianathomas/Downloads/rag/plc"
 ECHO ============================================
 ECHO   Starting RAG MCP server
 ECHO   Time: %DATE% %TIME%

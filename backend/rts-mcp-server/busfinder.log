@@ -958,3 +958,77 @@
 2026/04/10 14:19:20 Indexed 91516 stop_times from ../data/stop_times.txt into 3409 trips
 2026/04/13 14:10:20 Loaded 952 GTFS stops from ../data/stops.txt
 2026/04/13 14:10:20 Indexed 91516 stop_times from ../data/stop_times.txt into 3409 trips
+2026/04/17 19:06:52 Loaded 952 GTFS stops from ../data/stops.txt
+2026/04/17 19:06:52 Indexed 91516 stop_times from ../data/stop_times.txt into 3409 trips
+2026/04/17 20:24:22 CallToolRequest: origin="Hub" dest="Reitz Union" intent="NEXT_BUS"
+2026/04/17 20:24:22 TransitClient created with API key (len=64)
+2026/04/17 20:24:41 CallToolRequest: origin="The Hub" dest="Reitz Union" intent="NEXT_BUS"
+2026/04/17 20:24:41 TransitClient created with API key (len=64)
+2026/04/17 20:24:41 GTFS fuzzy resolve OK: input="The Hub" → "The HUB" (score=1.000)
+2026/04/17 20:24:41 GTFS fuzzy resolve OK: input="Reitz Union" → "Reitz Union" (score=1.000)
+2026/04/17 20:24:41 GTFS origin resolved: input="The Hub" → "The HUB" (lat=29.648530 lon=-82.344960)
+2026/04/17 20:24:41 GTFS destination resolved: input="Reitz Union" → "Reitz Union" (lat=29.645140 lon=-82.346983)
+2026/04/17 20:24:41 Calling nearby_stops for lat=29.648530 lon=-82.344960 radius=100m (RTSFL only)
+2026/04/17 20:24:41 HTTP GET /v3/public/nearby_stops?lat=29.648530&lon=-82.344960&radius=100
+2026/04/17 20:24:41 nearby_stops RTSFL best match at radius=100m: GSID=RTSFL:13082 name="The HUB" dist=1.00
+2026/04/17 20:24:41 Calling nearby_stops for lat=29.645140 lon=-82.346983 radius=100m (RTSFL only)
+2026/04/17 20:24:41 HTTP GET /v3/public/nearby_stops?lat=29.645140&lon=-82.346983&radius=100
+2026/04/17 20:24:41 nearby_stops RTSFL best match at radius=100m: GSID=RTSFL:12261 name="Reitz Union" dist=1.00
+2026/04/17 20:24:41 Nearby origin: GTFS="The HUB" → API="The HUB" (GSID=RTSFL:13082)
+2026/04/17 20:24:41 Nearby destination: GTFS="Reitz Union" → API="Reitz Union"
+2026/04/17 20:24:41 Realtime fast-path search: originGSID=RTSFL:13082 originName="The HUB" destName="Reitz Union"
+2026/04/17 20:24:41 HTTP GET /v3/public/stop_departures?global_stop_id=RTSFL%3A13082&max_num_departures=20&remove_cancelled=true&should_update_realtime=true
+2026/04/17 20:24:41 stop_departures returned 6 routes
+2026/04/17 20:24:41 Route 118 (P&R 1 (Cultural Plaza) To The Hub) has 1 itineraries
+2026/04/17 20:24:41   Itinerary headsign="Cultural Plaza" has 10 schedule items
+2026/04/17 20:24:41 Route 126 (UF E / W Circulator (Lakeside To Sorority Row)) has 1 itineraries
+2026/04/17 20:24:41   Itinerary headsign="Sorority Row" has 10 schedule items
+2026/04/17 20:24:41 Route 33 (Butler Plaza - The Standard) has 1 itineraries
+2026/04/17 20:24:41   Itinerary headsign="Butler Plaza" has 9 schedule items
+2026/04/17 20:24:41 Route 12 (The Hub to Dollar General) has 2 itineraries
+2026/04/17 20:24:41   Itinerary headsign="Dollar General" has 10 schedule items
+2026/04/17 20:24:41   Itinerary headsign="The Hub" has 10 schedule items
+2026/04/17 20:24:41 Route 9 (Reitz Union To Hunters Run) has 1 itineraries
+2026/04/17 20:24:41   Itinerary headsign="The Hub" has 10 schedule items
+2026/04/17 20:24:41     Fast-path match: route=9 headsign="The Hub" departure=1776474180 isRealtime=false
+2026/04/17 20:24:41 Route 38 (Reitz Union to Gainesville Place) has 1 itineraries
+2026/04/17 20:24:41   Itinerary headsign="The Hub" has 10 schedule items
+2026/04/17 20:24:41     Fast-path match: route=38 headsign="The Hub" departure=1776474240 isRealtime=false
+2026/04/17 20:24:41 Realtime fast-path produced 2 matching direct trips
+2026/04/17 20:29:38 CallToolRequest: origin="The Hub" dest="Reitz Union" intent="NEXT_BUS"
+2026/04/17 20:29:38 TransitClient created with API key (len=64)
+2026/04/17 20:29:38 GTFS fuzzy resolve OK: input="The Hub" → "The HUB" (score=1.000)
+2026/04/17 20:29:38 GTFS fuzzy resolve OK: input="Reitz Union" → "Reitz Union" (score=1.000)
+2026/04/17 20:29:38 GTFS origin resolved: input="The Hub" → "The HUB" (lat=29.648530 lon=-82.344960)
+2026/04/17 20:29:38 GTFS destination resolved: input="Reitz Union" → "Reitz Union" (lat=29.645140 lon=-82.346983)
+2026/04/17 20:29:38 Calling nearby_stops for lat=29.648530 lon=-82.344960 radius=100m (RTSFL only)
+2026/04/17 20:29:38 HTTP GET /v3/public/nearby_stops?lat=29.648530&lon=-82.344960&radius=100
+2026/04/17 20:29:38 nearby_stops RTSFL best match at radius=100m: GSID=RTSFL:13082 name="The HUB" dist=1.00
+2026/04/17 20:29:38 Calling nearby_stops for lat=29.645140 lon=-82.346983 radius=100m (RTSFL only)
+2026/04/17 20:29:38 HTTP GET /v3/public/nearby_stops?lat=29.645140&lon=-82.346983&radius=100
+2026/04/17 20:29:38 nearby_stops RTSFL best match at radius=100m: GSID=RTSFL:12261 name="Reitz Union" dist=1.00
+2026/04/17 20:29:38 Nearby origin: GTFS="The HUB" → API="The HUB" (GSID=RTSFL:13082)
+2026/04/17 20:29:38 Nearby destination: GTFS="Reitz Union" → API="Reitz Union"
+2026/04/17 20:29:38 Realtime fast-path search: originGSID=RTSFL:13082 originName="The HUB" destName="Reitz Union"
+2026/04/17 20:29:38 HTTP GET /v3/public/stop_departures?global_stop_id=RTSFL%3A13082&max_num_departures=20&remove_cancelled=true&should_update_realtime=true
+2026/04/17 20:29:38 stop_departures returned 6 routes
+2026/04/17 20:29:38 Route 118 (P&R 1 (Cultural Plaza) To The Hub) has 1 itineraries
+2026/04/17 20:29:38   Itinerary headsign="Cultural Plaza" has 10 schedule items
+2026/04/17 20:29:38 Route 126 (UF E / W Circulator (Lakeside To Sorority Row)) has 1 itineraries
+2026/04/17 20:29:38   Itinerary headsign="Sorority Row" has 10 schedule items
+2026/04/17 20:29:38 Route 33 (Butler Plaza - The Standard) has 1 itineraries
+2026/04/17 20:29:38   Itinerary headsign="Butler Plaza" has 9 schedule items
+2026/04/17 20:29:38 Route 12 (The Hub to Dollar General) has 2 itineraries
+2026/04/17 20:29:38   Itinerary headsign="Dollar General" has 10 schedule items
+2026/04/17 20:29:38   Itinerary headsign="The Hub" has 10 schedule items
+2026/04/17 20:29:38 Route 9 (Reitz Union To Hunters Run) has 1 itineraries
+2026/04/17 20:29:38   Itinerary headsign="The Hub" has 10 schedule items
+2026/04/17 20:29:38     Fast-path match: route=9 headsign="The Hub" departure=1776474180 isRealtime=false
+2026/04/17 20:29:38 Route 38 (Reitz Union to Gainesville Place) has 1 itineraries
+2026/04/17 20:29:38   Itinerary headsign="The Hub" has 10 schedule items
+2026/04/17 20:29:38     Fast-path match: route=38 headsign="The Hub" departure=1776474240 isRealtime=false
+2026/04/17 20:29:38 Realtime fast-path produced 2 matching direct trips
+2026/04/18 09:39:18 Loaded 952 GTFS stops from ../data/stops.txt
+2026/04/18 09:39:18 Indexed 91516 stop_times from ../data/stop_times.txt into 3409 trips
+2026/04/18 14:24:55 Loaded 952 GTFS stops from ../data/stops.txt
+2026/04/18 14:24:55 Indexed 91516 stop_times from ../data/stop_times.txt into 3409 trips

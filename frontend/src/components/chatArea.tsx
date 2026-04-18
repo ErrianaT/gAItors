@@ -264,21 +264,32 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
   
       const data = await response.json();
   
+      let text = data.content || "I've processed your request.";
+  
+      if (data.images?.[0]?.data) {
+        text += `\n\n[IMAGE_DATA]:${data.images[0].data}`;
+      }
+  
       const botMessage: Message = {
         sender: "bot",
-        text: data.content || "I've processed your request.",
+        text: text,
       };
   
       onSendMessage([...updatedMessages, botMessage]);
+  
     } catch (error) {
       onSendMessage([
         ...updatedMessages,
         { sender: "bot", text: "Backend Error!" }
       ]);
+  
     } finally {
+      // ✅ THIS IS WHAT YOU ARE MISSING
       setIsLoading(false);
     }
   };
+
+  
 
   const renderMessageContent = (text: string) => {
     const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
@@ -378,165 +389,198 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
     }
 
     // --- 3. Weather Tool Formatting ---
-    if (text.includes("°F") || text.toLowerCase().includes("forecast")) {
-      const forecastLines = lines.filter(line => line.startsWith('- **'));
-      const introText = lines[0]; 
-      const footerText = lines[lines.length - 1].startsWith('-') ? "" : lines[lines.length - 1];
-    
-      const weatherData = forecastLines.map(line => {
-        const timeMatch = line.match(/\*\*(.*?)\*\*/);
-        const time = timeMatch ? timeMatch[1].trim() : "";
-        const details = line.split('**:')[1] || "";
-        const parts = details.split(',').map(p => p.trim());
-        const condition = parts[0] || "Clear";
-        const temp = parts[1] || "N/A";
-        let humidity = parts[2] ? parts[2].replace(/[a-zA-Z\s]+/g, '').trim() : "";
-        
-        return { time, condition, temp, humidity };
-      });
-    
+    if (
+      text.includes("°F") ||
+      text.toLowerCase().includes("weather")
+    ) {
+      const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+
+      const introText = lines[0] || "";
+
+      const lastLine = lines[lines.length - 1] || "";
+      const footerText = lastLine.startsWith("-") ? "" : lastLine;
+
+      const weatherData = lines
+        // grab anything that looks like a forecast line
+        .filter(line => /(\d+(\.\d+)?°F)/.test(line))
+        .map(line => {
+          // --- TIME ---
+          const timeMatch = line.match(/\*\*(.*?)\*\*/);
+          let time = "";
+
+          if (timeMatch) {
+            time = timeMatch[1];
+          } else {
+            const fallbackMatch = line.match(/-\s*(.*?):/);
+            time = fallbackMatch ? fallbackMatch[1] : "";
+          }
+
+          time = time
+            .replace(/\*\*/g, "")
+            .replace(/^-/, "")
+            .trim();
+          // --- TEMPERATURE (robust) ---
+          const tempMatch = line.match(/(\d+(\.\d+)?°F)/);
+          const temp = tempMatch ? tempMatch[1] : "N/A";
+
+          // --- HUMIDITY ---
+          const humidityMatch = line.match(/(\d+%)/);
+          const humidity = humidityMatch ? humidityMatch[1] : "";
+
+          // --- CONDITION ---
+          let condition = "Clear";
+
+          // try to extract text between ":" and temp
+          const afterColon = line.split(":")[1] || "";
+
+          if (afterColon) {
+            const cleaned = afterColon
+              .replace(/(\d+(\.\d+)?°F)/, "") // remove temp
+              .replace(/(\d+%)/, "")         // remove humidity
+              .replace(/[,|]/g, "")          // remove separators
+              .trim();
+
+            if (cleaned.length > 0) {
+              condition = cleaned;
+            }
+          }
+
+          return {
+            time,
+            condition,
+            temp,
+            humidity
+          };
+        });
+
       return (
         <div className="weather-forecast">
           <h3 className="bold-title">Gainesville Forecast</h3>
+
           <p className="weather-intro">{introText}</p>
+
           <div className="forecast-strip">
             {weatherData.map((slot, i) => (
               <div key={i} className="weather-card">
                 <span className="weather-time">{slot.time}</span>
-                <img src={getWeatherIcon(slot.condition)} alt={slot.condition} className="weather-icon-png" />
+
+                <img
+                  src={getWeatherIcon(slot.condition)}
+                  alt={slot.condition}
+                  className="weather-icon-png"
+                />
+
                 <span className="weather-temp">{slot.temp}</span>
+
                 <span className="weather-desc">{slot.condition}</span>
-                {slot.humidity && <span className="weather-humidity">💧 {slot.humidity}</span>}
+
+                {slot.humidity && (
+                  <span className="weather-humidity">
+                    💧 {slot.humidity}
+                  </span>
+                )}
               </div>
             ))}
           </div>
-          {footerText && <p className="weather-note">{footerText}</p>}
+
+          {footerText && (
+            <p className="weather-note">{footerText}</p>
+          )}
         </div>
       );
     }
 
-    // --- 4. RTS Bus Tool Formatting ---
-    if (text.includes("Route") || text.includes("Leg") || text.includes("Bus Schedule")) {
-      const extractTimes = (str: string) => {
-        const timeRegex = /(\d{1,2}:\d{2}\s?[APM]{2})/gi;
-        return str.match(timeRegex) || [];
-      };
-
-      const directRoutes = lines.filter(l => 
-        /Route\s+\d+/i.test(l) && !l.toLowerCase().includes('leg')
-      ).map(line => {
-        const routeMatch = line.match(/Route\s*(\d+)/i);
-        const route = routeMatch ? routeMatch[1] : "??";
-        const times = extractTimes(line);
-        // If no time in the route line, look at the next line in the original text
-        return { route, departs: times[0] || "See details" };
-      });
-
-      const legs = lines.filter(l => l.toLowerCase().includes('leg')).map(line => {
-        const times = extractTimes(line);
-        return {
-          text: line.replace(/^[-*#\s]+/, '').replace(/\*\*/g, ''),
-          departs: times[0],
-          arrives: times[1]
-        };
-      });
-
-      return (
-        <div className="transit-container">
-          <h3 className="bold-title">🚌 Bus Schedule</h3>
-          
-          {directRoutes.length > 0 && (
-            <div className="direct-trips-section">
-              {directRoutes.map((bus, i) => (
-                <div key={i} className="bus-card">
-                  <div className="bus-number">#{bus.route}</div>
-                  <div className="bus-info">
-                    <span className="bus-time">Departs: {bus.departs}</span>
-                    <span className="bus-status">Direct Trip</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {legs.length > 0 && (
-            <div className="transfer-card">
-              <div className="transfer-header">Transfer Details</div>
-              <div className="timeline">
-                {legs.map((leg, i) => (
-                  <div key={i} className="timeline-item">
-                    <div className="timeline-dot"></div>
-                    <div className="timeline-content">
-                      <div className="leg-description">{leg.text}</div>
-                      {(leg.departs || leg.arrives) && (
-                        <div className="leg-times">
-                          {leg.departs && <span><b>Departs:</b> {leg.departs}</span>}
-                          {leg.arrives && <span><b>Arrives:</b> {leg.arrives}</span>}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          <p className="footer-note-text">
-            {lines.find(l => l.toLowerCase().includes("no scheduled") || l.toLowerCase().includes("no direct"))}
-          </p>
-        </div>
-      );
-    }
-
-    const GYM_URLS: Record<string, string> = {
-      "srfc_weight":   "http://recsports.ufl.edu/cam/cam8.jpg",
-      "srfc_cardio":   "http://recsports.ufl.edu/cam/cam7.jpg",
-      "swrc_weight1":  "http://recsports.ufl.edu/cam/cam1.jpg",
-      "swrc_weight2":  "http://recsports.ufl.edu/cam/cam4.jpg",
-      "swrc_cardio":   "http://recsports.ufl.edu/cam/cam5.jpg",
-      "swrc_basket12": "http://recsports.ufl.edu/cam/cam3.jpg",
-      "swrc_basket34": "http://recsports.ufl.edu/cam/cam2.jpg",
-      "swrc_basket56": "http://recsports.ufl.edu/cam/cam6.jpg",
-    };
+    // const GYM_URLS: Record<string, string> = {
+    //   "srfc_weight":   "http://recsports.ufl.edu/cam/cam8.jpg",
+    //   "srfc_cardio":   "http://recsports.ufl.edu/cam/cam7.jpg",
+    //   "swrc_weight1":  "http://recsports.ufl.edu/cam/cam1.jpg",
+    //   "swrc_weight2":  "http://recsports.ufl.edu/cam/cam4.jpg",
+    //   "swrc_cardio":   "http://recsports.ufl.edu/cam/cam5.jpg",
+    //   "swrc_basket12": "http://recsports.ufl.edu/cam/cam3.jpg",
+    //   "swrc_basket34": "http://recsports.ufl.edu/cam/cam2.jpg",
+    //   "swrc_basket56": "http://recsports.ufl.edu/cam/cam6.jpg",
+    // };
 
     // --- 5. Gym Camera Tool Formatting ---
-    if (text.toLowerCase().includes("gym") || text.toLowerCase().includes("camera")) {
-      let imageSrc = null;
-      let detectedLocation = "Gym Feed";
-      const base64Match = text.match(/(image\/(?:jpeg|png)\|[A-Za-z0-9+/=]+)/);
-      
-      if (base64Match) {
-        const [mime, data] = base64Match[0].split('|');
-        imageSrc = `data:${mime};base64,${data}`;
-      } else {
-        const foundKey = Object.keys(GYM_URLS).find(key => 
-          text.toLowerCase().includes(key.replace('_', ' ')) || text.toLowerCase().includes(key.split('_')[1])
-        );
-        if (foundKey) {
-          imageSrc = GYM_URLS[foundKey];
-        }
-      }
+    // if (text.toLowerCase().includes("gym") || text.toLowerCase().includes("camera") || text.toLowerCase().includes("crowd")) {
+    //   let imageSrc = null;
+    //   let detectedLocation = "Camera Feed";
+    
+    //   const base64Match = text.match(/([A-Za-z0-9+/=\s]{3000,})/);
+    
+    //   if (base64Match) {
+    //     const cleaned = base64Match[1].replace(/\s/g, '');
+    //     imageSrc = `data:image/jpeg;base64,${cleaned}`;
+    //   }
+    
+    //   console.log(imageSrc);
 
+    //   return (
+    //     <div className="gym-cam-container">
+    //       <div className="place-header-row">
+    //         <h3 className="bold-title">🏋️ {detectedLocation}</h3>
+    //         <span className="place-price-tag">LIVE</span>
+    //       </div>
+    //       <p className="footer-note-text" style={{ margin: '8px 0' }}>{text.split('!')[0]}!</p>
+    //       {imageSrc ? (
+    //         <div className="cam-frame">
+    //           <div className="live-badge">● LIVE</div>
+    //           <img src={imageSrc} alt="Gym Camera" className="gym-image" loading="lazy" />
+    //           <div className="cam-timestamp">{new Date().toLocaleTimeString()}</div>
+    //         </div>
+    //       ) : (
+    //         <div className="cam-placeholder"><p>Unable to load live image.</p></div>
+    //       )}
+    //     </div>
+    //   );
+    // }
+    if (
+      text.toLowerCase().includes("gym") ||
+      text.toLowerCase().includes("camera") ||
+      text.toLowerCase().includes("crowd")
+    ) {
+      let detectedLocation = "Camera Feed";
+      let imageSrc: string | null = null;
+    
+      // ✅ safer regex (prevents catastrophic backtracking / huge match issues)
+      const match = text.match(/\[IMAGE_DATA\]:([\s\S]+)/);
+    
+      if (match?.[1]) {
+        const base64 = match[1].trim();
+        imageSrc = `data:image/jpeg;base64,${base64}`;
+      }
+    
+      const displayText = text.split("[IMAGE_DATA]")[0];
+    
       return (
         <div className="gym-cam-container">
           <div className="place-header-row">
             <h3 className="bold-title">🏋️ {detectedLocation}</h3>
             <span className="place-price-tag">LIVE</span>
           </div>
-          <p className="footer-note-text" style={{ margin: '8px 0' }}>{text.split('!')[0]}!</p>
+    
+          <p className="footer-note-text" style={{ margin: "8px 0" }}>
+            {displayText.split("!")[0]}!
+          </p>
+    
           {imageSrc ? (
             <div className="cam-frame">
               <div className="live-badge">● LIVE</div>
-              <img src={imageSrc} alt="Gym Camera" className="gym-image" loading="lazy" />
-              <div className="cam-timestamp">{new Date().toLocaleTimeString()}</div>
+              <img src={imageSrc} alt="Gym Camera" className="gym-image" />
+              <div className="cam-timestamp">
+                {new Date().toLocaleTimeString()}
+              </div>
             </div>
           ) : (
-            <div className="cam-placeholder"><p>Unable to load live image.</p></div>
+            <div className="cam-placeholder">
+              <p>Unable to load live image.</p>
+            </div>
           )}
         </div>
       );
     }
-
+    
+    
     // --- 7. Blue Phone / Emergency Tool ---
     if (text.toLowerCase().includes("blue safety phone") || text.toLowerCase().includes("blue emergency phone") || text.includes("blue phone")) {
       const locationMatch = text.match(/at\s+["']?([^"']+)["']?,\s+approximately/i) || text.match(/at the (.*?) \(Building (\d+)\)/i);

@@ -69,7 +69,6 @@ const DefaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
-// Helper to move the map view when coordinates change
 const ChangeView: React.FC<{ center: [number, number] }> = ({ center }) => {
   const map = useMap();
   map.setView(center, 16);
@@ -77,28 +76,21 @@ const ChangeView: React.FC<{ center: [number, number] }> = ({ center }) => {
 };
 
 const LeafletMap: React.FC<{ locationName: string }> = ({ locationName }) => {
-  const [position, setPosition] = useState<[number, number]>([29.6465, -82.3477]); // default Reitz Union
+  const [position, setPosition] = useState<[number, number]>([29.6465, -82.3477]);
 
   useEffect(() => {
-    const fetchCoords = async () => {
-      try {
-        const query = encodeURIComponent(`${locationName}, University of Florida, Gainesville, FL`);
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`
-        );
-        const data = await response.json();
-
-        if (data && data.length > 0) {
-          const lat = parseFloat(data[0].lat);
-          const lon = parseFloat(data[0].lon);
-          setPosition([lat, lon]);
-        }
-      } catch (error) {
-        console.error("Geocoding error:", error);
-      }
-    };
-
-    if (locationName) fetchCoords();
+    if (!locationName) return;
+  
+    const match =
+      Object.keys(UF_LOCATIONS).find(key =>
+        locationName.toLowerCase().includes(key.toLowerCase())
+      );
+  
+    if (match) {
+      setPosition(UF_LOCATIONS[match]);
+    } else {
+      console.warn("No UF match found, staying default:", locationName);
+    }
   }, [locationName]);
 
   return (
@@ -182,6 +174,33 @@ const extractDocxText = async (file: File) => {
   });
 
   return result.value; // plain text
+};
+
+const extractLocation = (text: string): string => {
+  const lines = text.split("\n").map(l => l.trim());
+
+  // 1. Look for lines with keywords
+  const candidate = lines.find(line =>
+    /at|near|by|location/i.test(line)
+  );
+
+  if (candidate) {
+    // grab text after "at" or "near"
+    const match = candidate.match(/(?:at|near|by)\s+(.*?)(,|\.|$)/i);
+    if (match?.[1]) {
+      return match[1].trim();
+    }
+  }
+
+  // 2. fallback: use first non-empty line
+  return lines[0] || "University of Florida";
+};
+
+const UF_LOCATIONS: Record<string, [number, number]> = {
+  "Holland Law Building": [29.649778662130075, -82.35934158428046],
+  "Library West": [29.651454439302427, -82.34290232658918],
+  "Marston Science Library": [29.6513, -82.3416],
+  "Reitz Union": [29.6465, -82.3477],
 };
 
 
@@ -292,7 +311,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
   const renderMessageContent = (text: string) => {
     const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
    
-    // --- 8. RAG tool ---
+    // --- RAG tool ---
     const isUploadConfirmation =
     text.toLowerCase().includes("successfully uploaded") ||
     text.toLowerCase().includes("has been successfully uploaded");
@@ -335,8 +354,6 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
 
     // listing documents formatting
     if (isRAGDocumentList) {
-    console.log("📁 RAG BLOCK TRIGGERED");
-
     const formatName = (path: string) => {
       if (!path) return "Untitled";
 
@@ -419,7 +436,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
       </div>
     );
     }
-    // --- 1. Professor Tool Formatting ---
+    // --- Professor Tool Formatting ---
     if (text.toLowerCase().includes("quality rating") || text.toLowerCase().includes("professor")) {
       const data = parseBotString(text);
       
@@ -475,7 +492,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
       );
     }
   
-    // --- 2. Restaurants Tool Formatting ---
+    // --- Restaurants Tool Formatting ---
     if (text.includes("Address:") || text.includes("Rating:") || text.includes("Location:")) {
       const segments = text.split(/\n(?=\d+\.)/);
       const blocks = segments.slice(1);
@@ -513,7 +530,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
       );
     }
 
-    // --- 3. Weather Tool Formatting ---
+    // --- Weather Tool Formatting ---
     if (
       text.includes("°F") ||
       text.toLowerCase().includes("weather")
@@ -613,7 +630,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
       );
     }
 
-    // --- 5. Gym Camera Tool Formatting ---
+    // --- Gym Camera Tool Formatting ---
     if (
       text.toLowerCase().includes("gym") ||
       text.toLowerCase().includes("camera") ||
@@ -660,10 +677,17 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
     }
     
     
-    // --- 7. Blue Phone Tool ---
-    if (text.toLowerCase().includes("blue safety phone") || text.toLowerCase().includes("blue emergency phone") || text.includes("blue phone")) {
-      const locationMatch = text.match(/at\s+["']?([^"']+)["']?,\s+approximately/i) || text.match(/at the (.*?) \(Building (\d+)\)/i);
-      const buildingDisplay = locationMatch ? locationMatch[1] : "Campus Location";
+    // --- Blue Phone Tool ---
+    if (text.toLowerCase().includes("blue safety phone") || text.toLowerCase().includes("nearest blue phone") || text.includes("blue phone")) {
+      // const locationMatch = text.match(/at\s+["']?([^"']+)["']?,\s+approximately/i) || text.match(/at the (.*?) \(Building (\d+)\)/i);
+      const buildingDisplay = extractLocation(text);
+      const cleanLocation = buildingDisplay
+        .replace(/\b(NW|NE|SW|SE)\b/gi, "")
+        .replace(/\b\d{3,}\b/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+      console.log("🧠 extracted:", buildingDisplay);
+      console.log("🧹 cleaned:", cleanLocation);
       const distanceMatch = text.match(/approximately (.*?) away/i) || text.match(/around (.*?) and/i);
       const distance = distanceMatch ? distanceMatch[1] : "Nearby";
       const directions = lines.filter(l => /^\d+\./.test(l));
@@ -683,7 +707,10 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
               </div>
             </div>
             <div className="mini-map-container" style={{ height: '200px', margin: '12px 0', borderRadius: '8px', overflow: 'hidden' }}>
-              <LeafletMap locationName={buildingDisplay} />
+            <LeafletMap 
+              locationName={`${cleanLocation}, Gainesville, FL`} 
+              key={cleanLocation}
+            />
             </div>
             {directions.length > 0 && (
               <div className="directions-box">

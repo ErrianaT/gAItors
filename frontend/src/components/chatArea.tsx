@@ -179,20 +179,17 @@ const extractDocxText = async (file: File) => {
 const extractLocation = (text: string): string => {
   const lines = text.split("\n").map(l => l.trim());
 
-  // 1. Look for lines with keywords
   const candidate = lines.find(line =>
     /at|near|by|location/i.test(line)
   );
 
   if (candidate) {
-    // grab text after "at" or "near"
+    // grabbing text after these words
     const match = candidate.match(/(?:at|near|by)\s+(.*?)(,|\.|$)/i);
     if (match?.[1]) {
       return match[1].trim();
     }
   }
-
-  // 2. fallback: use first non-empty line
   return lines[0] || "University of Florida";
 };
 

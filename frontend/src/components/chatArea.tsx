@@ -198,6 +198,7 @@ const UF_LOCATIONS: Record<string, [number, number]> = {
   "Library West": [29.651454439302427, -82.34290232658918],
   "Marston Science Library": [29.6513, -82.3416],
   "Reitz Union": [29.6465, -82.3477],
+  "Hull Road Park & Ride Lot West": [29.63728876970945, -82.36883866371656]
 };
 
 
@@ -592,7 +593,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
 
       return (
         <div className="weather-forecast">
-          <h3 className="bold-title">Gainesville Forecast</h3>
+          <h3 className="bold-title">Weather Forecast</h3>
 
           <p className="weather-intro">{introText}</p>
 
@@ -683,8 +684,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
         .replace(/\b\d{3,}\b/g, "")
         .replace(/\s+/g, " ")
         .trim();
-      console.log("🧠 extracted:", buildingDisplay);
-      console.log("🧹 cleaned:", cleanLocation);
+
       const distanceMatch = text.match(/approximately (.*?) away/i) || text.match(/around (.*?) and/i);
       const distance = distanceMatch ? distanceMatch[1] : "Nearby";
       const directions = lines.filter(l => /^\d+\./.test(l));
@@ -711,7 +711,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage }) => {
             </div>
             {directions.length > 0 && (
               <div className="directions-box">
-                <span className="loc-label">Walking Directions</span>
+                <span className="loc-label">Directions</span>
                 <div className="steps-list">
                   {directions.map((step, i) => (
                     <div key={i} className="step-item">
